@@ -23,8 +23,8 @@ namespace BonnieYork
             var context = HttpContext.Current;
             var response = context.Response;
             //allow-origin直接用* 代表網域全開，或是這邊是要設定看對接的人網域是多少
-            response.AddHeader("Access-Control-Allow-Origin", "*");
-            response.AddHeader("X-Frame-Options", "ALLOW-FROM *");
+            //response.AddHeader("Access-Control-Allow-Origin", "*");
+            //response.AddHeader("X-Frame-Options", "ALLOW-FROM *");
 
             if (context.Request.HttpMethod == "OPTIONS")
             {

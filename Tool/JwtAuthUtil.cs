@@ -28,7 +28,7 @@ namespace BonnieYork.JWT
                 { "Identity", identity },
                 { "BusinessItemId", businessItemId },
                 { "Token", userToken },
-                { "Exp", DateTime.Now.AddMinutes(10).ToString() } // JwtToken 時效設定 1 0 分
+                { "Exp", DateTime.Now.AddMinutes(60).ToString() } // JwtToken 時效設定 1 0 分
             };
 
             // 產生 JwtToken

@@ -35,7 +35,7 @@ namespace BonnieYork.Tool
                 if (request.Headers.Authorization == null || request.Headers.Authorization.Scheme != "Bearer")  //Bearer為前端放驗證的類型
                 {
                     // 可考慮配合前端專案開發期限，不修改 StatusCode 預設 200，將請求失敗搭配 Status: false 供前端判斷
-                    string messageJson = JsonConvert.SerializeObject(new { Status = false, Message = "JwtToken錯誤" }); // JwtToken 遺失，需導引重新登入
+                    string messageJson = JsonConvert.SerializeObject(new { Status = false, Message = "JwtToken為空或是格式錯誤" }); // JwtToken 遺失，需導引重新登入
                     var errorMessage = new HttpResponseMessage()
                     {
                         // StatusCode = System.Net.HttpStatusCode.Unauthorized, // 401
@@ -72,7 +72,7 @@ namespace BonnieYork.Tool
                     catch (Exception)
                     {
                         // 解密失敗
-                        string messageJson = JsonConvert.SerializeObject(new { Status = false, Message = "JwtToken不符" }); // JwtToken 不符，需導引重新登入
+                        string messageJson = JsonConvert.SerializeObject(new { Status = false, Message = "JwtToken解密失敗" }); // JwtToken 不符，需導引重新登入
                         var errorMessage = new HttpResponseMessage()
                         {
                             // StatusCode = System.Net.HttpStatusCode.Unauthorized, // 401

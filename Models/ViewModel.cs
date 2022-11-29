@@ -35,6 +35,14 @@ namespace BonnieYork.Models
 
         // Customer Store Staff共用
         [Required(ErrorMessage = "{0}必填")]
+        [Display(Name = "密碼")]
+        [StringLength(100, ErrorMessage = "{0} 長度至少必須為 {2} 個字元。", MinimumLength = 6)]  //最多100個字，最少6個字
+        [DataType(DataType.Password)]
+        public string CheckPassword { get; set; }
+
+
+        // Customer Store Staff共用
+        [Required(ErrorMessage = "{0}必填")]
         [Display(Name = "手機號碼")]
         public string CellphoneNumber { get; set; }
 
@@ -166,13 +174,13 @@ namespace BonnieYork.Models
         [Display(Name = "密碼")]
         [StringLength(100, ErrorMessage = "{0} 長度至少必須為 {2} 個字元。", MinimumLength = 6)]  //最多100個字，最少6個字
         [DataType(DataType.Password)]
-        public string NewPassword { get; set; }
+        public string Password { get; set; }
 
 
         [Required(ErrorMessage = "{0}必填")]
         [Display(Name = "密碼")]
         [StringLength(100, ErrorMessage = "{0} 長度至少必須為 {2} 個字元。", MinimumLength = 6)]  //最多100個字，最少6個字
         [DataType(DataType.Password)]
-        public string ConfirmNewlPassword { get; set; }
+        public string CheckPassword { get; set; }
     }
 }

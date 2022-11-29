@@ -25,6 +25,7 @@ namespace BonnieYork.Controllers
         /// <summary>
         /// (註冊)判斷Email是否註冊過
         /// </summary>
+        [HttpPost]
         [Route("SignUpIsValid")]
         public IHttpActionResult SignUpIsValid(ViewModel view) // 先判斷身分別，再判斷帳號是否註冊過
         {
@@ -109,13 +110,14 @@ namespace BonnieYork.Controllers
         }
 
 
+        [HttpPost]
         [Route("SignUpSendLink")]
         public IHttpActionResult SignUpSendLink(SignUpUserDataView view) //未註冊過，寄送註冊連結
         {
             string fromAddress = ConfigurationManager.AppSettings["fromAddress"];
             string toAddress = view.Account;
             string subject = "BonnieYork註冊連結確認";
-            string mailBody = "https://bonnieyork.rocket-coding.com/signup?token=";
+            string mailBody = "http://localhost:3000/signup?token=";
             string emailPassword = ConfigurationManager.AppSettings["emailPassword"];
             string token = "";
             if (view.Identity == "staff")
@@ -145,6 +147,7 @@ namespace BonnieYork.Controllers
         }
 
 
+        [HttpGet]
         [Route("GetSignUpToken")]
         [JwtAuthFilter]
         public IHttpActionResult GetSignUpToken() //*********取得token解密後回傳 **********
@@ -162,6 +165,7 @@ namespace BonnieYork.Controllers
         }
 
 
+        [HttpPost]
         [Route("SignUpUserData")]
         public IHttpActionResult SignUpUserData(SignUpUserDataView view)
         {
@@ -172,60 +176,96 @@ namespace BonnieYork.Controllers
 
             if (view.Identity == "member")
             {
-                customerDetail.Account = view.Account;
-                customerDetail.Password = BitConverter
-                    .ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.Password))).Replace("-", null);
-                customerDetail.CustomerName = view.CustomerName;
-                customerDetail.CellphoneNumber = view.CellphoneNumber;
-                customerDetail.BirthDay = view.BirthDay;
-                db.CustomerDetail.Add(customerDetail);
-                db.SaveChanges();
-                result = new
+                if (view.Password != view.CheckPassword)
                 {
-                    message = "顧客註冊完成"
-                };
+                    result = new
+                    {
+                        message = "密碼不同"
+                    };
+                }
+                else
+                {
+                    customerDetail.Account = view.Account;
+                    customerDetail.Password = BitConverter
+                        .ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.Password))).Replace("-", null);
+                    customerDetail.CustomerName = view.CustomerName;
+                    customerDetail.CellphoneNumber = view.CellphoneNumber;
+                    customerDetail.BirthDay = view.BirthDay;
+                    db.CustomerDetail.Add(customerDetail);
+                    db.SaveChanges();
+                    result = new
+                    {
+                        message = "顧客註冊完成"
+                    };
+                }
+
             }
             else if (view.Identity == "store")
             {
-                storeDetail.Account = view.Account;
-                storeDetail.Password = BitConverter
-                    .ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.Password))).Replace("-", null);
-                storeDetail.StoreName = view.StoreName;
-                storeDetail.City = view.City;
-                storeDetail.District = view.District;
-                storeDetail.Address = view.Address;
-                storeDetail.CellphoneNumber = view.CellphoneNumber;
-
-                var storeDetailResult = db.StoreDetail.Add(storeDetail);
-                db.SaveChanges();
-
-                result = new
+                if (view.Password != view.CheckPassword)
                 {
-                    message = "店鋪註冊完成"
-                };
-            }
-            else if (view.Identity == "staff")
-            {
-                var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
-
-                staffDetail.Account = view.Account;
-                staffDetail.Password = BitConverter.ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.Password))).Replace("-", null);
-                staffDetail.StoreId = Convert.ToInt32(userToken["StoreId"]);
-                staffDetail.JobTitle = userToken["JobTitle"].ToString();
-                staffDetail.StaffName = view.StaffName;
-                staffDetail.CellphoneNumber = view.CellphoneNumber;
-
-                db.StaffDetail.Add(staffDetail);
-                db.SaveChanges();
-
-                result = new
+                    result = new
+                    {
+                        message = "密碼不同"
+                    };
+                }
+                else
                 {
-                    message = "員工註冊完成"
-                };
+                    storeDetail.Account = view.Account;
+                    storeDetail.Password = BitConverter
+                        .ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.Password))).Replace("-", null);
+                    storeDetail.StoreName = view.StoreName;
+                    storeDetail.City = view.City;
+                    storeDetail.District = view.District;
+                    storeDetail.Address = view.Address;
+                    storeDetail.CellphoneNumber = view.CellphoneNumber;
+
+                    var storeDetailResult = db.StoreDetail.Add(storeDetail);
+                    db.SaveChanges();
+
+                    result = new
+                    {
+                        message = "店鋪註冊完成"
+                    };
+                }
+
             }
+            //else if (view.Identity == "staff")
+            //{
+            //    if (view.Password != view.CheckPassword)
+            //    {
+            //        result = new
+            //        {
+            //            message = "密碼不同"
+            //        };
+            //    }
+            //    else
+            //    {
+            //        var storeId = db.StaffDetail.Where(e => e.Account == view.Account).Select(e => new
+            //        {
+            //            e.StoreId,
+            //            e.JobTitle
+            //        }).ToList();
+            //        staffDetail.Account = view.Account;
+            //        staffDetail.Password = BitConverter.ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.Password))).Replace("-", null);
+            //        staffDetail.StaffName = view.StaffName;
+            //        staffDetail.CellphoneNumber = view.CellphoneNumber;
+
+            //        db.StaffDetail.Add(staffDetail);
+            //        db.SaveChanges();
+
+            //        result = new
+            //        {
+            //            message = "員工註冊完成"
+            //        };
+            //    }
+
+            //}
             return Ok(result);
         }
 
+
+        [HttpPost]
         [Route("Login")]
         public IHttpActionResult Login(SignUpUserDataView view) // 還沒加staff
         {
@@ -251,7 +291,10 @@ namespace BonnieYork.Controllers
                         "", "", customerInformation[0].CustomerName, "member");
                     result = new
                     {
-                        message = "已登入",
+                        Identity = "member",
+                        Id = customerInformation[0].Id,
+                        CostomerName = customerInformation[0].CustomerName,
+                        Message = "已登入",
                         Token = token
                     };
                 }
@@ -283,7 +326,10 @@ namespace BonnieYork.Controllers
                     string token = JwtAuthUtil.GenerateToken(0, storeInformation[0].Id, view.Account, storeInformation[0].StoreName, "", "", "store");
                     result = new
                     {
-                        message = "已登入",
+                        Identity = "store",
+                        Id = storeInformation[0].Id,
+                        StoreName = storeInformation[0].StoreName,
+                        Message = "已登入",
                         Token = token
                     };
 
@@ -293,12 +339,20 @@ namespace BonnieYork.Controllers
                     var staffInformation = db.StaffDetail.Select(e => new
                     {
                         e.Id,
-                        e.StaffName
+                        e.StaffName,
+                        e.StoreId
                     }).ToList();
-                    string token = JwtAuthUtil.GenerateToken(0, staffInformation[0].Id, view.Account, "", staffInformation[0].StaffName, "", "staff");
+                    var storeName = db.StoreDetail.Where(s => s.Id == staffInformation[0].StoreId).ToList();
+
+                    string token = JwtAuthUtil.GenerateToken(staffInformation[0].Id, staffInformation[0].StoreId, view.Account, storeName[0].StoreName, staffInformation[0].StaffName, "", "staff");
                     result = new
                     {
-                        message = "已登入",
+                        Identity = "staff",
+                        Id = staffInformation[0].Id,
+                        StoreId = staffInformation[0].StoreId,
+                        StoreName = storeName[0].StoreName,
+                        StaffName = staffInformation[0].StaffName,
+                        Message = "已登入",
                         Token = token
                     };
                 }
@@ -313,6 +367,8 @@ namespace BonnieYork.Controllers
             return Ok(result);
         }
 
+
+        [HttpPost]
         [Route("ResetPassword")]
         public IHttpActionResult ResetPassword(ResetPasswordView view)
         {
@@ -331,7 +387,7 @@ namespace BonnieYork.Controllers
 
                 if (passwordInDb.Count > 0)
                 {
-                    if (view.NewPassword != view.ConfirmNewlPassword)
+                    if (view.Password != view.CheckPassword)
                     {
                         result = new
                         {
@@ -340,7 +396,7 @@ namespace BonnieYork.Controllers
                     }
                     else
                     {
-                        string newHashPassword = BitConverter.ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.ConfirmNewlPassword))).Replace("-", null);
+                        string newHashPassword = BitConverter.ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.CheckPassword))).Replace("-", null);
 
                         foreach (CustomerDetail item in passwordInDb)
                         {
@@ -369,7 +425,7 @@ namespace BonnieYork.Controllers
                 var passwordInDb = db.StoreDetail.Where(s => s.Password == hashPassword).ToList();
                 if (passwordInDb.Count > 0)
                 {
-                    if (view.NewPassword != view.ConfirmNewlPassword)
+                    if (view.Password != view.CheckPassword)
                     {
                         result = new
                         {
@@ -378,7 +434,7 @@ namespace BonnieYork.Controllers
                     }
                     else
                     {
-                        string newHashPassword = BitConverter.ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.ConfirmNewlPassword))).Replace("-", null);
+                        string newHashPassword = BitConverter.ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.CheckPassword))).Replace("-", null);
 
                         foreach (StoreDetail item in passwordInDb)
                         {
@@ -400,7 +456,7 @@ namespace BonnieYork.Controllers
                 var passwordInDb = db.StaffDetail.Where(e => e.Password == hashPassword).ToList();
                 if (passwordInDb.Count > 0)
                 {
-                    if (view.NewPassword != view.ConfirmNewlPassword)
+                    if (view.Password != view.CheckPassword)
                     {
                         result = new
                         {
@@ -409,7 +465,7 @@ namespace BonnieYork.Controllers
                     }
                     else
                     {
-                        string newHashPassword = BitConverter.ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.ConfirmNewlPassword))).Replace("-", null);
+                        string newHashPassword = BitConverter.ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.CheckPassword))).Replace("-", null);
 
                         foreach (StaffDetail item in passwordInDb)
                         {
@@ -428,17 +484,27 @@ namespace BonnieYork.Controllers
             return Ok(result);
         }
 
-        //public IHttpActionResult GetTest() //*********取得token解密後回傳 **********
-        //{
-        //    CustomerAccountManager test = new CustomerAccountManager();
-        //    var passwordInDb = db.StoreAccountManager.Where(s => s.Id == 13)
-        //        .ToList();
+        [HttpGet]
+        [Route("VerifyUser")]
+        [JwtAuthFilter]
+        public IHttpActionResult VerifyUser()
+        {
+            object result = new { };
+            var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+            result = new
+            {
+                Message = "有效的JwtToken",
+                IdentityId = userToken["IdentityId"],
+                Identity = userToken["Identity"],
+                Account = userToken["Account"],
+                StoreId = userToken["StoreId"],
+                StoreName = userToken["StoreName"],
+                StaffName = userToken["StaffName"],
+                CustomerName = userToken["CustomerName"],
 
-        //    object result = new
-        //    {
-        //        test = passwordInDb[0].Account
-        //    };
-        //    return Ok(result);
-        //}
+            };
+            return Ok(result);
+        }
+
     }
 }
