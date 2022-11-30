@@ -486,6 +486,36 @@
             (註冊)判斷Email是否註冊過
             </summary>
         </member>
+        <member name="M:BonnieYork.Controllers.UserController.SignUpSendLink(BonnieYork.Models.SignUpUserDataView)">
+            <summary>
+            (註冊)發送註冊連結
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.UserController.GetSignUpToken">
+            <summary>
+            (註冊)解密回傳token
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.UserController.SignUpUserData(BonnieYork.Models.SignUpUserDataView)">
+            <summary>
+            (註冊)存入密碼及基本資料
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.UserController.Login(BonnieYork.Models.SignUpUserDataView)">
+            <summary>
+            登入
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.UserController.ResetPassword(BonnieYork.Models.ResetPasswordView)">
+            <summary>
+            重設密碼
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.UserController.VerifyUser">
+            <summary>
+            每頁驗證
+            </summary>
+        </member>
         <member name="T:BonnieYork.Tool.JwtAuthFilter">
             <summary>
             JwtAuthFilter 繼承 ActionFilterAttribute 可生成 [JwtAuthFilter] 使用

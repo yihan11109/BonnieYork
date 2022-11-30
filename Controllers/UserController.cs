@@ -41,7 +41,7 @@ namespace BonnieYork.Controllers
                 {
                     result = new
                     {
-                        message = "已註冊過"
+                        Message = "已註冊過"
                     };
                 }
                 else
@@ -51,14 +51,14 @@ namespace BonnieYork.Controllers
                     {
                         result = new
                         {
-                            message = "未註冊過"
+                            Message = "未註冊過"
                         };
                     }
                     else
                     {
                         result = new
                         {
-                            message = modelErrorMessage[0][0].ErrorMessage
+                            Message = modelErrorMessage[0][0].ErrorMessage
                         };
                     }
                 }
@@ -74,7 +74,7 @@ namespace BonnieYork.Controllers
                     {
                         result = new
                         {
-                            message = "已註冊過"
+                            Message = "已註冊過"
                         };
                     }
                     else
@@ -84,14 +84,14 @@ namespace BonnieYork.Controllers
                         {
                             result = new
                             {
-                                message = "未註冊過"
+                                Message = "未註冊過"
                             };
                         }
                         else
                         {
                             result = new
                             {
-                                message = modelErrorMessage[0][0].ErrorMessage
+                                Message = modelErrorMessage[0][0].ErrorMessage
                             };
                         }
                     }
@@ -101,7 +101,7 @@ namespace BonnieYork.Controllers
                 {
                     result = new
                     {
-                        message = "無此Identity"
+                        Message = "無此Identity"
                     };
                 }
             }
@@ -109,7 +109,9 @@ namespace BonnieYork.Controllers
             return Ok(result);
         }
 
-
+        /// <summary>
+        /// (註冊)發送註冊連結
+        /// </summary>
         [HttpPost]
         [Route("SignUpSendLink")]
         public IHttpActionResult SignUpSendLink(SignUpUserDataView view) //未註冊過，寄送註冊連結
@@ -141,12 +143,15 @@ namespace BonnieYork.Controllers
 
             object result = new
             {
-                message = $"註冊連結已寄到{view.Account}",
+                Message = $"註冊連結已寄到{view.Account}",
             };
             return Ok(result);
         }
 
 
+        /// <summary>
+        /// (註冊)解密回傳token
+        /// </summary>
         [HttpGet]
         [Route("GetSignUpToken")]
         [JwtAuthFilter]
@@ -165,6 +170,9 @@ namespace BonnieYork.Controllers
         }
 
 
+        /// <summary>
+        /// (註冊)存入密碼及基本資料
+        /// </summary>
         [HttpPost]
         [Route("SignUpUserData")]
         public IHttpActionResult SignUpUserData(SignUpUserDataView view)
@@ -180,7 +188,7 @@ namespace BonnieYork.Controllers
                 {
                     result = new
                     {
-                        message = "密碼不同"
+                        Message = "密碼不同"
                     };
                 }
                 else
@@ -193,9 +201,16 @@ namespace BonnieYork.Controllers
                     customerDetail.BirthDay = view.BirthDay;
                     db.CustomerDetail.Add(customerDetail);
                     db.SaveChanges();
+
+                    var customerInformation = db.CustomerDetail.Where(c => c.Account == view.Account).ToList();
+
+                    string token = JwtAuthUtil.GenerateToken(customerInformation[0].Id, 0, view.Account,
+                        "", "", customerInformation[0].CustomerName, "member");
+
                     result = new
                     {
-                        message = "顧客註冊完成"
+                        Message = "顧客註冊完成",
+                        Token = token
                     };
                 }
 
@@ -206,7 +221,7 @@ namespace BonnieYork.Controllers
                 {
                     result = new
                     {
-                        message = "密碼不同"
+                        Message = "密碼不同"
                     };
                 }
                 else
@@ -223,9 +238,14 @@ namespace BonnieYork.Controllers
                     var storeDetailResult = db.StoreDetail.Add(storeDetail);
                     db.SaveChanges();
 
+                    var storeInformation = db.StoreDetail.Where(s => s.Account == view.Account).ToList();
+
+                    string token = JwtAuthUtil.GenerateToken(storeInformation[0].Id, storeInformation[0].Id, view.Account, storeInformation[0].StoreName, "", "", "store");
+
                     result = new
                     {
-                        message = "店鋪註冊完成"
+                        Message = "店鋪註冊完成",
+                        Token = token
                     };
                 }
 
@@ -265,6 +285,9 @@ namespace BonnieYork.Controllers
         }
 
 
+        /// <summary>
+        /// 登入
+        /// </summary>
         [HttpPost]
         [Route("Login")]
         public IHttpActionResult Login(SignUpUserDataView view) // 還沒加staff
@@ -293,7 +316,7 @@ namespace BonnieYork.Controllers
                     {
                         Identity = "member",
                         Id = customerInformation[0].Id,
-                        CostomerName = customerInformation[0].CustomerName,
+                        CustomerName = customerInformation[0].CustomerName,
                         Message = "已登入",
                         Token = token
                     };
@@ -302,7 +325,7 @@ namespace BonnieYork.Controllers
                 {
                     result = new
                     {
-                        message = "密碼錯誤",
+                        Message = "密碼錯誤",
                     };
                 }
             }
@@ -323,7 +346,7 @@ namespace BonnieYork.Controllers
                         s.Id,
                         s.StoreName
                     }).ToList();
-                    string token = JwtAuthUtil.GenerateToken(0, storeInformation[0].Id, view.Account, storeInformation[0].StoreName, "", "", "store");
+                    string token = JwtAuthUtil.GenerateToken(storeInformation[0].Id, storeInformation[0].Id, view.Account, storeInformation[0].StoreName, "", "", "store");
                     result = new
                     {
                         Identity = "store",
@@ -360,7 +383,7 @@ namespace BonnieYork.Controllers
                 {
                     result = new
                     {
-                        message = "密碼錯誤",
+                        Message = "密碼錯誤",
                     };
                 }
             }
@@ -368,6 +391,9 @@ namespace BonnieYork.Controllers
         }
 
 
+        /// <summary>
+        /// 重設密碼
+        /// </summary>
         [HttpPost]
         [Route("ResetPassword")]
         public IHttpActionResult ResetPassword(ResetPasswordView view)
@@ -391,7 +417,7 @@ namespace BonnieYork.Controllers
                     {
                         result = new
                         {
-                            message = "新密碼與再次新密碼輸入的內容不一致",
+                            Message = "新密碼與再次輸入新密碼的內容不一致",
                         };
                     }
                     else
@@ -406,7 +432,7 @@ namespace BonnieYork.Controllers
                         db.SaveChanges();
                         result = new
                         {
-                            message = "密碼修改完成",
+                            Message = "密碼修改完成",
                         };
                     }
                 }
@@ -414,14 +440,13 @@ namespace BonnieYork.Controllers
                 {
                     result = new
                     {
-                        message = "輸入的舊密碼不符",
+                        Message = "輸入的舊密碼不符",
                     };
                 }
             }
             else if (userToken["Identity"].ToString() == "store")
             {
-                string hashPassword = BitConverter.ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.OriginalPassword)))
-                    .Replace("-", null);
+                string hashPassword = BitConverter.ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.OriginalPassword))).Replace("-", null);
                 var passwordInDb = db.StoreDetail.Where(s => s.Password == hashPassword).ToList();
                 if (passwordInDb.Count > 0)
                 {
@@ -429,7 +454,7 @@ namespace BonnieYork.Controllers
                     {
                         result = new
                         {
-                            message = "新密碼與再次新密碼輸入的內容不一致",
+                            Message = "新密碼與再次輸入新密碼的內容不一致",
                         };
                     }
                     else
@@ -444,7 +469,7 @@ namespace BonnieYork.Controllers
                         db.SaveChanges();
                         result = new
                         {
-                            message = "密碼修改完成",
+                            Message = "密碼修改完成",
                         };
                     }
                 }
@@ -460,7 +485,7 @@ namespace BonnieYork.Controllers
                     {
                         result = new
                         {
-                            message = "新密碼與再次新密碼輸入的內容不一致",
+                            Message = "新密碼與再次輸入新密碼的內容不一致",
                         };
                     }
                     else
@@ -475,7 +500,7 @@ namespace BonnieYork.Controllers
                         db.SaveChanges();
                         result = new
                         {
-                            message = "密碼修改完成",
+                            Message = "密碼修改完成",
                         };
                     }
                 }
@@ -484,6 +509,10 @@ namespace BonnieYork.Controllers
             return Ok(result);
         }
 
+
+        /// <summary>
+        /// 每頁驗證
+        /// </summary>
         [HttpGet]
         [Route("VerifyUser")]
         [JwtAuthFilter]
