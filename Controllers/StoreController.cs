@@ -52,11 +52,11 @@ namespace BonnieYork.Controllers
             };
             return Ok(result);
         }
-
+         
 
         [HttpPost]
-        [Route("Information")]
-        public IHttpActionResult Information([FromBody]InformationDataView view)
+        [Route("EditInformation")]
+        public IHttpActionResult EditInformation([FromBody]InformationDataView view)
         {
             var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
             int identityId = (int)userToken["IdentityId"];

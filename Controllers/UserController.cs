@@ -34,7 +34,7 @@ namespace BonnieYork.Controllers
 
             if (view.Identity == "member")
             {
-                var hasEmail = db.CustomerDetail.Where(c => c.Account == view.Account).ToList();
+                var hasEmail = db.CustomerDetail.Where(c => c.Account == view.Account.ToLower()).ToList();
 
                 //判斷Email是否註冊過
                 if (hasEmail.Count > 0)
@@ -43,6 +43,7 @@ namespace BonnieYork.Controllers
                     {
                         Message = "已註冊過"
                     };
+                    return Ok(result);
                 }
                 else
                 {
@@ -53,20 +54,18 @@ namespace BonnieYork.Controllers
                         {
                             Message = "未註冊過"
                         };
+                        return Ok(result);
                     }
                     else
                     {
-                        result = new
-                        {
-                            Message = modelErrorMessage[0][0].ErrorMessage
-                        };
+                        return BadRequest(modelErrorMessage[0][0].ErrorMessage);
                     }
                 }
             }
             else
             {
-                var hasStoreEmail = db.StoreDetail.Where(s => s.Account == view.Account).ToList();
-                var hasStaffEmail = db.StaffDetail.Where(e => e.Account == view.Account).ToList();
+                var hasStoreEmail = db.StoreDetail.Where(s => s.Account == view.Account.ToLower()).ToList();
+                var hasStaffEmail = db.StaffDetail.Where(e => e.Account == view.Account.ToLower()).ToList();
                 if (view.Identity == "store" || view.Identity == "staff")
                 {
                     //判斷Email是否註冊過
@@ -76,6 +75,7 @@ namespace BonnieYork.Controllers
                         {
                             Message = "已註冊過"
                         };
+                        return Ok(result);
                     }
                     else
                     {
@@ -86,27 +86,22 @@ namespace BonnieYork.Controllers
                             {
                                 Message = "未註冊過"
                             };
+                            return Ok(result);
                         }
                         else
                         {
-                            result = new
-                            {
-                                Message = modelErrorMessage[0][0].ErrorMessage
-                            };
+                            return BadRequest(modelErrorMessage[0][0].ErrorMessage);
                         }
                     }
 
                 }
                 else
                 {
-                    result = new
-                    {
-                        Message = "無此Identity"
-                    };
+                    return BadRequest("無此Identity");
                 }
             }
 
-            return Ok(result);
+            
         }
 
         /// <summary>
@@ -117,9 +112,10 @@ namespace BonnieYork.Controllers
         public IHttpActionResult SignUpSendLink(SignUpUserDataView view) //未註冊過，寄送註冊連結
         {
             string fromAddress = ConfigurationManager.AppSettings["fromAddress"];
-            string toAddress = view.Account;
+            string toAddress = view.Account.ToLower();
             string subject = "BonnieYork註冊連結確認";
-            string mailBody = "http://localhost:3000/signup?token=";
+            string mailBody = "親愛的BonnieYork會員您好："+"<br>此封信件為您在BonnieYork註冊會員時所發送之連結信件，"+ "<br >請點選註冊連結進入頁面以完成註冊。<br ><br>" + "※提醒您，此註冊連結有效期為10分鐘，若連結失效請再次前往註冊頁面重新寄送註冊連結，謝謝您。<br><br>  http://localhost:3000/signup?token=";
+            string mailBodyEnd = "<br><br>-----此為系統發出信件，請勿直接回覆，感謝您的配合。-----";
             string emailPassword = ConfigurationManager.AppSettings["emailPassword"];
             string token = "";
             if (view.Identity == "staff")
@@ -128,7 +124,7 @@ namespace BonnieYork.Controllers
 
                 if (view.BusinessItemsId != 0)
                 {
-                    userToken["Account"] = view.Account;
+                    userToken["Account"] = view.Account.ToLower();
                     userToken["JobTitle"] = view.JobTitle;
                     userToken["BusinessItemsId"] = view.BusinessItemsId;
                     token = JwtAuthUtil.StaffSignUpToken(userToken);
@@ -136,14 +132,14 @@ namespace BonnieYork.Controllers
             }
             else
             {
-                token = JwtAuthUtil.GenerateSignUpToken(view.Account, 0, view.Identity, 0, "");
+                token = JwtAuthUtil.GenerateSignUpToken(view.Account.ToLower(), 0, view.Identity, 0, "");
             }
 
-            Mail.SendGmailMail(fromAddress, toAddress, subject, mailBody + token, emailPassword);
+            Mail.SendGmailMail(fromAddress, toAddress, subject, mailBody + token + mailBodyEnd, emailPassword);
 
             object result = new
             {
-                Message = $"註冊連結已寄到{view.Account}",
+                Message = $"註冊連結已寄到{view.Account.ToLower()}",
             };
             return Ok(result);
         }
@@ -155,7 +151,7 @@ namespace BonnieYork.Controllers
         [HttpGet]
         [Route("GetSignUpToken")]
         [JwtAuthFilter]
-        public IHttpActionResult GetSignUpToken() //*********取得token解密後回傳 **********
+        public IHttpActionResult GetSignUpToken() //取得token解密後回傳
         {
             // 取出請求內容，解密 JwtToken 取出資料(每一個都做token檢查)
             var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
@@ -186,14 +182,11 @@ namespace BonnieYork.Controllers
             {
                 if (view.Password != view.CheckPassword)
                 {
-                    result = new
-                    {
-                        Message = "密碼不同"
-                    };
+                    return BadRequest("密碼不同");
                 }
                 else
                 {
-                    customerDetail.Account = view.Account;
+                    customerDetail.Account = view.Account.ToLower();
                     customerDetail.Password = BitConverter
                         .ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.Password))).Replace("-", null);
                     customerDetail.CustomerName = view.CustomerName;
@@ -204,7 +197,7 @@ namespace BonnieYork.Controllers
 
                     var customerInformation = db.CustomerDetail.Where(c => c.Account == view.Account).ToList();
 
-                    string token = JwtAuthUtil.GenerateToken(customerInformation[0].Id, 0, view.Account,
+                    string token = JwtAuthUtil.GenerateToken(customerInformation[0].Id, 0, view.Account.ToLower(),
                         "", "", customerInformation[0].CustomerName, "member");
 
                     result = new
@@ -219,14 +212,11 @@ namespace BonnieYork.Controllers
             {
                 if (view.Password != view.CheckPassword)
                 {
-                    result = new
-                    {
-                        Message = "密碼不同"
-                    };
+                    return BadRequest("密碼不同");
                 }
                 else
                 {
-                    storeDetail.Account = view.Account;
+                    storeDetail.Account = view.Account.ToLower();
                     storeDetail.Password = BitConverter
                         .ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.Password))).Replace("-", null);
                     storeDetail.StoreName = view.StoreName;
@@ -238,9 +228,9 @@ namespace BonnieYork.Controllers
                     var storeDetailResult = db.StoreDetail.Add(storeDetail);
                     db.SaveChanges();
 
-                    var storeInformation = db.StoreDetail.Where(s => s.Account == view.Account).ToList();
+                    var storeInformation = db.StoreDetail.Where(s => s.Account == view.Account.ToLower()).ToList();
 
-                    string token = JwtAuthUtil.GenerateToken(storeInformation[0].Id, storeInformation[0].Id, view.Account, storeInformation[0].StoreName, "", "", "store");
+                    string token = JwtAuthUtil.GenerateToken(storeInformation[0].Id, storeInformation[0].Id, view.Account.ToLower(), storeInformation[0].StoreName, "", "", "store");
 
                     result = new
                     {
@@ -298,7 +288,7 @@ namespace BonnieYork.Controllers
                 CustomerDetail customer = new CustomerDetail();
                 customer.Password = BitConverter
                     .ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.Password))).Replace("-", null);
-                var passwordChecked = db.CustomerDetail.Where(c => c.Account == view.Account)
+                var passwordChecked = db.CustomerDetail.Where(c => c.Account == view.Account.ToLower())
                     .Where(c => c.Password == customer.Password).ToList();
 
                 if (passwordChecked.Count > 0)
@@ -323,10 +313,7 @@ namespace BonnieYork.Controllers
                 }
                 else
                 {
-                    result = new
-                    {
-                        Message = "密碼錯誤",
-                    };
+                    return BadRequest("密碼錯誤");
                 }
             }
             else if (view.Identity == "store")
@@ -336,8 +323,8 @@ namespace BonnieYork.Controllers
                 store.Password = BitConverter.ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.Password)))
                     .Replace("-", null);
                 //找帳號密碼是否存在
-                var StorePasswordChecked = db.StoreDetail.Where(s => s.Account == view.Account).Where(s => s.Password == store.Password).ToList();
-                var StaffPasswordChecked = db.StaffDetail.Where(s => s.Account == view.Account).Where(s => s.Password == store.Password).ToList();
+                var StorePasswordChecked = db.StoreDetail.Where(s => s.Account == view.Account.ToLower()).Where(s => s.Password == store.Password).ToList();
+                var StaffPasswordChecked = db.StaffDetail.Where(s => s.Account == view.Account.ToLower()).Where(s => s.Password == store.Password).ToList();
 
                 if (StorePasswordChecked.Count > 0)
                 {
@@ -346,7 +333,7 @@ namespace BonnieYork.Controllers
                         s.Id,
                         s.StoreName
                     }).ToList();
-                    string token = JwtAuthUtil.GenerateToken(storeInformation[0].Id, storeInformation[0].Id, view.Account, storeInformation[0].StoreName, "", "", "store");
+                    string token = JwtAuthUtil.GenerateToken(storeInformation[0].Id, storeInformation[0].Id, view.Account.ToLower(), storeInformation[0].StoreName, "", "", "store");
                     result = new
                     {
                         Identity = "store",
@@ -367,7 +354,7 @@ namespace BonnieYork.Controllers
                     }).ToList();
                     var storeName = db.StoreDetail.Where(s => s.Id == staffInformation[0].StoreId).ToList();
 
-                    string token = JwtAuthUtil.GenerateToken(staffInformation[0].Id, staffInformation[0].StoreId, view.Account, storeName[0].StoreName, staffInformation[0].StaffName, "", "staff");
+                    string token = JwtAuthUtil.GenerateToken(staffInformation[0].Id, staffInformation[0].StoreId, view.Account.ToLower(), storeName[0].StoreName, staffInformation[0].StaffName, "", "staff");
                     result = new
                     {
                         Identity = "staff",
@@ -381,10 +368,7 @@ namespace BonnieYork.Controllers
                 }
                 else
                 {
-                    result = new
-                    {
-                        Message = "密碼錯誤",
-                    };
+                    return BadRequest("密碼錯誤");
                 }
             }
             return Ok(result);
@@ -415,10 +399,7 @@ namespace BonnieYork.Controllers
                 {
                     if (view.Password != view.CheckPassword)
                     {
-                        result = new
-                        {
-                            Message = "新密碼與再次輸入新密碼的內容不一致",
-                        };
+                        return BadRequest("新密碼與再次輸入新密碼的內容不一致");
                     }
                     else
                     {
@@ -438,10 +419,7 @@ namespace BonnieYork.Controllers
                 }
                 else
                 {
-                    result = new
-                    {
-                        Message = "輸入的舊密碼不符",
-                    };
+                    return BadRequest("輸入的舊密碼不符");
                 }
             }
             else if (userToken["Identity"].ToString() == "store")
@@ -452,10 +430,7 @@ namespace BonnieYork.Controllers
                 {
                     if (view.Password != view.CheckPassword)
                     {
-                        result = new
-                        {
-                            Message = "新密碼與再次輸入新密碼的內容不一致",
-                        };
+                        return BadRequest("新密碼與再次輸入新密碼的內容不一致");
                     }
                     else
                     {
@@ -483,10 +458,7 @@ namespace BonnieYork.Controllers
                 {
                     if (view.Password != view.CheckPassword)
                     {
-                        result = new
-                        {
-                            Message = "新密碼與再次輸入新密碼的內容不一致",
-                        };
+                        return BadRequest("新密碼與再次輸入新密碼的內容不一致");
                     }
                     else
                     {

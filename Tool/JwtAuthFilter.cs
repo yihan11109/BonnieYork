@@ -38,7 +38,7 @@ namespace BonnieYork.Tool
                     string messageJson = JsonConvert.SerializeObject(new { Status = false, Message = "JwtToken為空或是格式錯誤" }); // JwtToken 遺失，需導引重新登入
                     var errorMessage = new HttpResponseMessage()
                     {
-                        // StatusCode = System.Net.HttpStatusCode.Unauthorized, // 401
+                        StatusCode = System.Net.HttpStatusCode.BadRequest, // 400
                         ReasonPhrase = "JwtToken Lost",
                         Content = new StringContent(messageJson,
                                     Encoding.UTF8,
@@ -48,19 +48,37 @@ namespace BonnieYork.Tool
                 }
                 else
                 {
+                    Dictionary<string,object> jwtObject;
                     try
                     {
                         // 有 JwtToken 且授權格式正確時執行，用 try 包住，因為如果有篡改可能解密失敗
                         // 解密後會回傳 Json 格式的物件 (即加密前的資料)
-                        var jwtObject = GetToken(request.Headers.Authorization.Parameter);
+                        jwtObject = GetToken(request.Headers.Authorization.Parameter);
+                    }
+                    catch (Exception)
+                    {
+                        // 解密失敗
+                        string messageJson = JsonConvert.SerializeObject(new { Status = false, Message = "JwtToken解密失敗" }); // JwtToken 不符，需導引重新登入
+                        var errorMessage = new HttpResponseMessage()
+                        {
+                            StatusCode = System.Net.HttpStatusCode.BadRequest, // 400
+                            ReasonPhrase = "JwtToken NotMatch",
+                            Content = new StringContent(messageJson,
+                                    Encoding.UTF8,
+                                    "application/json")
+                        };
+                        throw new HttpResponseException(errorMessage); // Debug 模式會停在此行，點繼續執行即可
+                    }
 
+                    try
+                    {
                         // 檢查有效期限是否過期，如 JwtToken 過期，需導引重新登入
                         if (IsTokenExpired(jwtObject["Exp"].ToString()))
                         {
                             string messageJson = JsonConvert.SerializeObject(new { Status = false, Message = "JwtToken 過期" }); // JwtToken 過期，需導引重新登入
                             var errorMessage = new HttpResponseMessage()
                             {
-                                // StatusCode = System.Net.HttpStatusCode.Unauthorized, // 401
+                                StatusCode = System.Net.HttpStatusCode.BadRequest, // 400
                                 ReasonPhrase = "JwtToken Expired",
                                 Content = new StringContent(messageJson,
                                     Encoding.UTF8,
@@ -69,19 +87,9 @@ namespace BonnieYork.Tool
                             throw new HttpResponseException(errorMessage); // Debug 模式會停在此行，點繼續執行即可
                         }
                     }
-                    catch (Exception)
+                    catch (Exception error)
                     {
-                        // 解密失敗
-                        string messageJson = JsonConvert.SerializeObject(new { Status = false, Message = "JwtToken解密失敗" }); // JwtToken 不符，需導引重新登入
-                        var errorMessage = new HttpResponseMessage()
-                        {
-                            // StatusCode = System.Net.HttpStatusCode.Unauthorized, // 401
-                            ReasonPhrase = "JwtToken NotMatch",
-                            Content = new StringContent(messageJson,
-                                    Encoding.UTF8,
-                                    "application/json")
-                        };
-                        throw new HttpResponseException(errorMessage); // Debug 模式會停在此行，點繼續執行即可
+                        throw error;
                     }
                 }
             }
