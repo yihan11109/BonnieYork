@@ -25,6 +25,7 @@ namespace BonnieYork.Models
         public virtual DbSet<StaffDetail> StaffDetail { get; set; }
         public virtual DbSet<StaffHoliday> StaffHoliday { get; set; }
         public virtual DbSet<StoreDetail> StoreDetail { get; set; }
+        public virtual DbSet<BusinessInformation> BusinessInformation { get; set; }
     }
 
     //public class MyEntity

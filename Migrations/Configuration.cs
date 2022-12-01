@@ -9,7 +9,7 @@ namespace BonnieYork.Migrations
     {
         public Configuration()
         {
-            AutomaticMigrationsEnabled = false;
+            AutomaticMigrationsEnabled = true;
         }
 
         protected override void Seed(BonnieYork.Models.BonnieYorkDbContext context)

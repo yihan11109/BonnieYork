@@ -146,6 +146,7 @@ namespace BonnieYork.Models
         public string StaffName { get; set; }
 
 
+
         //Staff
         [MaxLength(20)]     //不設長度預設為nvarchar(max)
         [Display(Name = "員工職稱")]
@@ -260,6 +261,49 @@ namespace BonnieYork.Models
         public string BannerPath { get; set; }
 
 
+        //Store
+        [Display(Name = "顧客可選時間區間")]
+        public string TimeInterval { get; set; }
+
+
+
+        //Store
+        [Display(Name = "平日開始營業時間")]
+        public string WeekdayStartTime { get; set; }
+
+
+        //Store
+        [Display(Name = "平日結束營業時間")]
+        public string WeekdayEndTime { get; set; }
+
+
+        //Store
+        [Display(Name = "平日休息時間")]
+        public string WeekdayBreakTime { get; set; }
+
+
+        //Store
+        [Display(Name = "假日開始營業時間")]
+        public string HolidayStartTime { get; set; }
+
+
+
+        //Store
+        [Display(Name = "假日結束營業時間")]
+        public string HolidayEndTime { get; set; }
+
+
+        //Store
+        [Display(Name = "假日休息時間")]
+        public string HolidayBreakTime { get; set; }
+
+
+        //Store
+        [Display(Name = "公休日")]
+        public string PublicHoliday { get; set; }
+
+
+
         //Store、Staff
         [Display(Name = "描述")]
         public string Description { get; set; }
@@ -291,6 +335,12 @@ namespace BonnieYork.Models
         [MaxLength(20)]     //不設長度預設為nvarchar(max)
         [Display(Name = "員工名稱")]
         public string StaffName { get; set; }
+        
+
+        //Staff
+        [Display(Name = "自我介紹")]
+        public string Introduction { get; set; }
+
 
 
         //Staff

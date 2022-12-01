@@ -50,11 +50,7 @@ namespace BonnieYork.Controllers
                     //判斷Email是否符合格式
                     if (ModelState.IsValid)
                     {
-                        result = new
-                        {
-                            Message = "未註冊過"
-                        };
-                        return Ok(result);
+                        return BadRequest("未註冊過");
                     }
                     else
                     {
@@ -82,11 +78,7 @@ namespace BonnieYork.Controllers
                         //判斷Email是否符合格式
                         if (ModelState.IsValid)
                         {
-                            result = new
-                            {
-                                Message = "未註冊過"
-                            };
-                            return Ok(result);
+                            return BadRequest("未註冊過");
                         }
                         else
                         {

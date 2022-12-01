@@ -103,5 +103,6 @@ namespace BonnieYork.Models
 
 
         public virtual ICollection<StaffDetail> StaffDetail { get; set; }
+        public virtual ICollection<BusinessInformation> BusinessInformation { get; set; }
     }
 }
