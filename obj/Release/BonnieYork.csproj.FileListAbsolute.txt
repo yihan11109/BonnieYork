@@ -141,3 +141,5 @@ C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\bin\System.Text.Encodi
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.createAllTable.resources
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.csproj.GenerateResource.cache
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.csproj.AssemblyReference.cache
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.editStoreDtail.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.addHeadShotToAllTable.resources

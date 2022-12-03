@@ -52,11 +52,6 @@ namespace BonnieYork.Models
         public string JobTitle { get; set; }
 
 
-
-        [Display(Name = "員工照片")]
-        public string PicturePath { get; set; }
-
-
         [MaxLength(20)]     //不設長度預設為nvarchar(max)
         [Display(Name = "手機號碼")]
         public string CellphoneNumber { get; set; }
@@ -77,8 +72,11 @@ namespace BonnieYork.Models
         [Display(Name = "Line連結")]
         public string LineLink { get; set; }
 
-        //[Display(Name = "工作項目")]
-        //public string LineLink { get; set; }
+
+
+
+        [Display(Name = "大頭照")]
+        public string HeadShot { get; set; }
 
 
         public virtual ICollection<StaffHoliday> StaffHoliday { get; set; }

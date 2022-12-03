@@ -21,6 +21,15 @@ namespace BonnieYork.Models
         [MaxLength(200)]
         [DataType(DataType.EmailAddress)]
         public string Account { get; set; }
+
+
+        
+        [Display(Name = "大頭照")]
+        public string HeadShot { get; set; }
+
+
+        [Display(Name = "照片類型")]
+        public string ImageType { get; set; }
     }
 
     public class SignUpUserDataView: ViewModel

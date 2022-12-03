@@ -31,17 +31,16 @@ namespace BonnieYork.Controllers
         {
             var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
             int identityId = (int)userToken["IdentityId"];
-            var customerInformation = db.CustomerDetail.Where(c => c.Id == identityId).ToList();
-
-            result = new
+            var customerInformation = db.CustomerDetail.Where(c => c.Id == identityId).Select(c => new
             {
-                Identity = "member",
-                Email = customerInformation[0].Account,
-                CustomerName = customerInformation[0].CustomerName,
-                CellphoneNumber = customerInformation[0].CellphoneNumber,
-                Birthday = customerInformation[0].BirthDay,
-            };
-            return Ok(result);
+               c.Account,
+               c.CustomerName,
+               c.CellphoneNumber,
+               c.BirthDay,
+               HeadShot = "https://" + Request.RequestUri.Host + "/upload/headshot/" + c.HeadShot,
+            }).ToList();
+
+            return Ok(new { Identity = "member", CustomerInformation = customerInformation});
         }
 
 
@@ -71,6 +70,7 @@ namespace BonnieYork.Controllers
         }
 
 
+
         [HttpPost]
         [Route("UploadProfile")]
         public async Task<IHttpActionResult> UploadProfile()
@@ -82,7 +82,7 @@ namespace BonnieYork.Controllers
             }
 
 
-            string root = HttpContext.Current.Server.MapPath(@"~/upload");
+            string root = HttpContext.Current.Server.MapPath(@"~/upload/headshot");
 
             try
             {
@@ -115,15 +115,16 @@ namespace BonnieYork.Controllers
 
                 }
                 image.Save(outputPath);
+                var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+                int identityId = (int)userToken["IdentityId"];
+                var customerHeadShot = db.CustomerDetail.Where(c => c.Id == identityId).ToList();
+                customerHeadShot[0].HeadShot = fileName;
+                image.Save(outputPath);
+                db.SaveChanges();
 
                 return Ok(new
                 {
-                    Status = true,
-                    Data = new
-                    {
-                        FileName = fileName,
-
-                    }
+                    Message = "照片上傳成功",
                 });
             }
             catch (Exception e)

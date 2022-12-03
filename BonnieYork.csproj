@@ -236,6 +236,14 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202212020731057_editStoreDtail.cs" />
+    <Compile Include="Migrations\202212020731057_editStoreDtail.Designer.cs">
+      <DependentUpon>202212020731057_editStoreDtail.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202212020741101_addHeadShotToAllTable.cs" />
+    <Compile Include="Migrations\202212020741101_addHeadShotToAllTable.Designer.cs">
+      <DependentUpon>202212020741101_addHeadShotToAllTable.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\createAllTable.cs" />
     <Compile Include="Migrations\createAllTable.Designer.cs">
       <DependentUpon>createAllTable.cs</DependentUpon>
@@ -339,6 +347,12 @@
     <Content Include="Scripts\jquery-3.4.1.min.map" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Migrations\202212020731057_editStoreDtail.resx">
+      <DependentUpon>202212020731057_editStoreDtail.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202212020741101_addHeadShotToAllTable.resx">
+      <DependentUpon>202212020741101_addHeadShotToAllTable.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Migrations\createAllTable.resx">
       <DependentUpon>createAllTable.cs</DependentUpon>
     </EmbeddedResource>

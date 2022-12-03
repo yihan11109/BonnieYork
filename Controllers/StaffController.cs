@@ -32,21 +32,19 @@ namespace BonnieYork.Controllers
             var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
             int identityId = (int)userToken["IdentityId"];
             int storeId = (int)userToken["StoreId"];
-            var staffInformation = db.StaffDetail.Where(e => e.Id == identityId).ToList();
-            var belongs = db.StoreDetail.Where(e => e.Id == storeId).Select(e => e.StoreName).ToList();
-
-            result = new
+            var staffInformation = db.StaffDetail.Where(e => e.Id == identityId).Select(e => new
             {
-                Identity = "staff",
-                Email = staffInformation[0].Account,
-                StoreName = belongs[0],
-                CellphoneNumber = staffInformation[0].CellphoneNumber,
-                Introduction = staffInformation[0].Introduction,
-                FacebookLink = staffInformation[0].FacebookLink,
-                InstagramLink = staffInformation[0].InstagramLink,
-                LineLink = staffInformation[0].LineLink,
-            };
-            return Ok(result);
+                e.Account,
+                e.StoreDetail.StoreName,
+                e.CellphoneNumber,
+                e.Introduction,
+                e.FacebookLink,
+                e.InstagramLink,
+                e.LineLink,
+                HeadShot = "https://" + Request.RequestUri.Host + "/upload/headshot/" + e.HeadShot,
+            }).ToList();
+
+            return Ok(new { Identity = "staff", StaffInformation = staffInformation });
         }
 
 
@@ -80,6 +78,8 @@ namespace BonnieYork.Controllers
             return Ok(result);
         }
 
+
+
         [HttpPost]
         [Route("UploadProfile")]
         public async Task<IHttpActionResult> UploadProfile()
@@ -91,7 +91,7 @@ namespace BonnieYork.Controllers
             }
 
 
-            string root = HttpContext.Current.Server.MapPath(@"~/upload");
+            string root = HttpContext.Current.Server.MapPath(@"~/upload/headshot");
 
             try
             {
@@ -124,15 +124,16 @@ namespace BonnieYork.Controllers
 
                 }
                 image.Save(outputPath);
+                var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+                int identityId = (int)userToken["IdentityId"];
+                var customerHeadShot = db.CustomerDetail.Where(c => c.Id == identityId).ToList();
+                customerHeadShot[0].HeadShot = fileName;
+                image.Save(outputPath);
+                db.SaveChanges();
 
                 return Ok(new
                 {
-                    Status = true,
-                    Data = new
-                    {
-                        FileName = fileName,
-
-                    }
+                    Message = "照片上傳成功",
                 });
             }
             catch (Exception e)

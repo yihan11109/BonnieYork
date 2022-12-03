@@ -4,12 +4,16 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using BonnieYork.JWT;
 using BonnieYork.Models;
 using BonnieYork.Tool;
+using Microsoft.Ajax.Utilities;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NSwag.Annotations;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -18,7 +22,7 @@ using SixLabors.ImageSharp.Processing;
 namespace BonnieYork.Controllers
 {
     [OpenApiTag("Store", Description = "店家資訊API")]
-    [RoutePrefix("store")]   //屬性路由前綴
+    [RoutePrefix("store")] //屬性路由前綴
     public class StoreController : ApiController
     {
         private BonnieYorkDbContext db = new BonnieYorkDbContext();
@@ -31,32 +35,35 @@ namespace BonnieYork.Controllers
         {
             var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
             int storeId = (int)userToken["StoreId"];
-            var storeInformation = db.StoreDetail.Where(s => s.Id == storeId).ToList();
-            var industryId = storeInformation[0].IndustryId;
-            var storeIndustry = db.Industry.Where(i => i.Id == industryId).Select(i => i.IndustryName).ToList();
-
-            result = new
+            var bannerPath = db.StoreDetail.Where(s => s.Id == storeId).Select(s => s.BannerPath).ToList();
+            JObject bannerJObject = new JObject();  //宣告空物件
+            if (bannerPath[0] != null)
             {
-                Identity = "store",
-                StoreName = storeInformation[0].StoreName,
-                Industry = new
-                {
-                    Id = storeInformation[0].IndustryId,
-                    Name = storeIndustry[0]
-                },
-                City = storeInformation[0].City,
-                District = storeInformation[0].District,
-                Address = storeInformation[0].Address,
-                CellphoneNumber = storeInformation[0].CellphoneNumber,
-                PhoneNumber = storeInformation[0].PhoneNumber,
-                StaffTitle = storeInformation[0].StaffTitle,
-                Description = storeInformation[0].Description,
-                BannerPath = storeInformation[0].BannerPath,
-                FacebookLink = storeInformation[0].FacebookLink,
-                InstagramLink = storeInformation[0].InstagramLink,
-                LineLink = storeInformation[0].LineLink,
-            };
-            return Ok(result);
+                bannerJObject = JObject.Parse(bannerPath[0]);  //把bannerPath(string) 轉成物件
+            }
+            foreach (var item in bannerJObject)
+            {
+                bannerJObject[item.Key] = "https://" + Request.RequestUri.Host + "/upload/Banner/" + item.Value;
+            }
+            var storeInformation = db.StoreDetail.Where(s => s.Id == storeId).Select(s => new
+            {
+                s.Account,
+                s.StoreName,
+                s.IndustryId,
+                s.Industry.Id,
+                s.City,
+                s.District,
+                s.Address,
+                s.CellphoneNumber,
+                s.PhoneNumber,
+                s.StaffTitle,
+                s.Description,
+                HeadShot = "https://" + Request.RequestUri.Host + "/upload/HeadShot/" + s.HeadShot,
+                s.FacebookLink,
+                s.InstagramLink,
+                s.LineLink
+            }).ToList();
+            return Ok(new { Identity = "store", StoreInformation = storeInformation,BannerPath = bannerJObject });
         }
 
 
@@ -84,6 +91,7 @@ namespace BonnieYork.Controllers
                 item.InstagramLink = view.InstagramLink;
                 item.LineLink = view.LineLink;
             }
+
             foreach (BusinessInformation item in businessInformation)
             {
                 item.TimeInterval = view.TimeInterval;
@@ -95,8 +103,10 @@ namespace BonnieYork.Controllers
                 item.HolidayBreakTime = view.HolidayBreakTime;
                 item.PublicHoliday = view.PublicHoliday;
             }
+
             db.SaveChanges();
-            string token = JwtAuthUtil.GenerateToken(storeDetailInDb[0].Id, storeDetailInDb[0].Id, storeDetailInDb[0].Account, storeDetailInDb[0].StoreName, "", "", "store");
+            string token = JwtAuthUtil.GenerateToken(storeDetailInDb[0].Id, storeDetailInDb[0].Id,
+                storeDetailInDb[0].Account, storeDetailInDb[0].StoreName, "", "", "store");
 
             result = new
             {
@@ -116,10 +126,7 @@ namespace BonnieYork.Controllers
             {
                 throw new HttpResponseException(HttpStatusCode.UnsupportedMediaType);
             }
-
-
-            string root = HttpContext.Current.Server.MapPath(@"~/upload");
-
+            string root = HttpContext.Current.Server.MapPath(@"~/upload/headshot");
             try
             {
                 // 讀取 MIME 資料
@@ -128,13 +135,19 @@ namespace BonnieYork.Controllers
 
                 // 取得檔案副檔名，單檔用.FirstOrDefault()直接取出，多檔需用迴圈
                 string fileNameData = provider.Contents.FirstOrDefault().Headers.ContentDisposition.FileName.Trim('\"');
+                string imageType = provider.Contents.FirstOrDefault().Headers.ContentDisposition.Name.Trim('\"');
                 string fileType = fileNameData.Remove(0, fileNameData.LastIndexOf('.')); // .jpg
 
                 // 定義檔案名稱
                 string fileName = "UserName" + "Profile" + DateTime.Now.ToString("yyyyMMddHHmmss") + fileType;
 
+
                 // 儲存圖片，單檔用.FirstOrDefault()直接取出，多檔需用迴圈
                 var fileBytes = await provider.Contents.FirstOrDefault().ReadAsByteArrayAsync();
+                if (imageType.Contains("Banner"))
+                {
+                    root = HttpContext.Current.Server.MapPath(@"~/upload/Banner");
+                }
                 var outputPath = Path.Combine(root, fileName);
                 using (var output = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
                 {
@@ -150,22 +163,55 @@ namespace BonnieYork.Controllers
                     image.Mutate(x => x.Resize(150, 120)); // 輸入(120, 0)會保持比例出現黑邊
 
                 }
-                image.Save(outputPath);
+                
+                var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+                int identityId = (int)userToken["IdentityId"];
 
-                return Ok(new
+                if (imageType == "HeadShot")
                 {
-                    Status = true,
-                    Data = new
+                    var storeHeadShot = db.StoreDetail.Where(s => s.Id == identityId).ToList();
+                    storeHeadShot[0].HeadShot = fileName;
+                    image.Save(outputPath);
+                    db.SaveChanges();
+                    return Ok(new
                     {
-                        FileName = fileName,
-
+                        Message = "照片上傳成功",
+                    });
+                }
+                else if (imageType.Contains("Banner"))
+                {
+                    var storeBannerDb = db.StoreDetail.Where(s => s.Id == identityId).ToList();
+                    //string storeBanner = storeBannerDb[0];
+                    JObject bannerJObject = new JObject();
+                    if (storeBannerDb[0].BannerPath != null)
+                    {
+                        bannerJObject = JObject.Parse(storeBannerDb[0].BannerPath);    //json
                     }
-                });
+                    bannerJObject[imageType] = fileName;
+                    storeBannerDb[0].BannerPath = bannerJObject.ToString();
+                    image.Save(outputPath);
+                    db.SaveChanges();
+                    return Ok(new
+                    {
+                        Message = "照片上傳成功",
+                    });
+                }
+                else
+                {
+                    return BadRequest("ImageType錯誤"); // 400
+                }
+
+
             }
             catch (Exception e)
             {
                 return BadRequest("照片上傳失敗或未上傳"); // 400
             }
+
+
+
+
+
         }
     }
 }

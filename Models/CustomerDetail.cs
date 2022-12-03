@@ -49,5 +49,9 @@ namespace BonnieYork.Models
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "yyyy-MM-dd")]
         [DataType(DataType.Date)]
         public string BirthDay { get; set; }
+
+
+        [Display(Name = "大頭照")]
+        public string HeadShot { get; set; }
     }
 }

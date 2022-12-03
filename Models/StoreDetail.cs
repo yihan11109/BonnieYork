@@ -102,6 +102,12 @@ namespace BonnieYork.Models
         public string LineLink { get; set; }
 
 
+
+        [Display(Name = "大頭照")]
+        public string HeadShot { get; set; }
+
+
+
         public virtual ICollection<StaffDetail> StaffDetail { get; set; }
         public virtual ICollection<BusinessInformation> BusinessInformation { get; set; }
     }
