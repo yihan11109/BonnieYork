@@ -67,18 +67,19 @@ namespace BonnieYork.Controllers
                     //判斷Email是否註冊過
                     if (hasStoreEmail.Count > 0 || hasStaffEmail.Count > 0)
                     {
-                        result = new
-                        {
-                            Message = "已註冊過"
-                        };
-                        return Ok(result);
+                        return BadRequest("已註冊過");
+
                     }
                     else
                     {
                         //判斷Email是否符合格式
                         if (ModelState.IsValid)
                         {
-                            return BadRequest("未註冊過");
+                            result = new
+                            {
+                                Message = "未註冊過"
+                            };
+                            return Ok(result);
                         }
                         else
                         {

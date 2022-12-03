@@ -244,6 +244,18 @@
     <Compile Include="Migrations\202212020741101_addHeadShotToAllTable.Designer.cs">
       <DependentUpon>202212020741101_addHeadShotToAllTable.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202212031111052_EditVirtualStoreDetail.cs" />
+    <Compile Include="Migrations\202212031111052_EditVirtualStoreDetail.Designer.cs">
+      <DependentUpon>202212031111052_EditVirtualStoreDetail.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202212031112380_AddVirtualStoreDetail.cs" />
+    <Compile Include="Migrations\202212031112380_AddVirtualStoreDetail.Designer.cs">
+      <DependentUpon>202212031112380_AddVirtualStoreDetail.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202212031650202_AddBusinessItemsTable.cs" />
+    <Compile Include="Migrations\202212031650202_AddBusinessItemsTable.Designer.cs">
+      <DependentUpon>202212031650202_AddBusinessItemsTable.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\createAllTable.cs" />
     <Compile Include="Migrations\createAllTable.Designer.cs">
       <DependentUpon>createAllTable.cs</DependentUpon>
@@ -251,6 +263,7 @@
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\BonnieYorkDbContext.cs" />
     <Compile Include="Models\BusinessInformation.cs" />
+    <Compile Include="Models\BusinessItems.cs" />
     <Compile Include="Tool\JwtAuthFilter.cs" />
     <Compile Include="Tool\JwtAuthUtil.cs" />
     <Compile Include="Models\CustomerDetail.cs" />
@@ -352,6 +365,15 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202212020741101_addHeadShotToAllTable.resx">
       <DependentUpon>202212020741101_addHeadShotToAllTable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202212031111052_EditVirtualStoreDetail.resx">
+      <DependentUpon>202212031111052_EditVirtualStoreDetail.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202212031112380_AddVirtualStoreDetail.resx">
+      <DependentUpon>202212031112380_AddVirtualStoreDetail.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202212031650202_AddBusinessItemsTable.resx">
+      <DependentUpon>202212031650202_AddBusinessItemsTable.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\createAllTable.resx">
       <DependentUpon>createAllTable.cs</DependentUpon>

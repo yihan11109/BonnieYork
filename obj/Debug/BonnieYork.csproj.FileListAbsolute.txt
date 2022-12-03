@@ -129,7 +129,6 @@ C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.c
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.csproj.CopyComplete
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.dll
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.pdb
-C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.csproj.AssemblyReference.cache
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\bin\SixLabors.ImageSharp.dll
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\bin\System.Buffers.dll
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\bin\System.Memory.dll
@@ -144,3 +143,7 @@ C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\bin\System.Runtime.Com
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\bin\System.Text.Encoding.CodePages.xml
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.editStoreDtail.resources
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.addHeadShotToAllTable.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.EditVirtualStoreDetail.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.AddVirtualStoreDetail.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.csproj.AssemblyReference.cache
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.AddBusinessItemsTable.resources

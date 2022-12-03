@@ -127,7 +127,7 @@ namespace BonnieYork.Controllers
                     Message = "照片上傳成功",
                 });
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return BadRequest("照片上傳失敗或未上傳"); // 400
             }

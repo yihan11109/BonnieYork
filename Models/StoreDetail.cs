@@ -23,7 +23,16 @@ namespace BonnieYork.Models
         [ForeignKey("IndustryId")]  //綁關聯
         public virtual Industry Industry { get; set; }
 
-        
+
+
+        [Display(Name = "營業資訊ID")]  //ForeignKey類別名稱
+        public int? BusinessInformationId { get; set; }
+
+
+        [ForeignKey("BusinessInformationId")]  //綁關聯
+        public virtual BusinessInformation BusinessInformation { get; set; }
+
+
 
         [Required(ErrorMessage = "{0}必填")]
         [Display(Name = "帳號")]
@@ -109,6 +118,6 @@ namespace BonnieYork.Models
 
 
         public virtual ICollection<StaffDetail> StaffDetail { get; set; }
-        public virtual ICollection<BusinessInformation> BusinessInformation { get; set; }
+        public virtual ICollection<BusinessItems> BusinessItems { get; set; }
     }
 }

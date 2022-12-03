@@ -14,15 +14,7 @@ namespace BonnieYork.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [DisplayName(displayName: "編號")]
         public int Id { get; set; }
-
-
-        [Display(Name = "店鋪ID")]  //ForeignKey類別名稱
-        public int? StoreId { get; set; }
-
-
-        [ForeignKey("StoreId")]  //綁關聯
-        public virtual StoreDetail StoreDetail { get; set; }
-
+        
 
         [Display(Name = "顧客可選時間區間")]
         [MaxLength(50)]     //不設長度預設為nvarchar(max)
@@ -62,5 +54,7 @@ namespace BonnieYork.Models
         [Display(Name = "公休日")]
         [MaxLength(20)]
         public string PublicHoliday { get; set; }
+
+        public virtual ICollection<StoreDetail> StoreDetail { get; set; }
     }
 }

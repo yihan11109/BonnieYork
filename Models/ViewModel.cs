@@ -366,4 +366,31 @@ namespace BonnieYork.Models
         [Display(Name = "員工工作項目ID")]
         public int BusinessItemsId { get; set; }
     }
+
+
+    public class AllItems
+    {
+        [Required(ErrorMessage = "{0}必填")]
+        [Display(Name = "項目名稱")]
+        [MaxLength(10)]
+        public string ItemName { get; set; }
+
+
+        [Required(ErrorMessage = "{0}必填")]
+        [Display(Name = "所需時間")]
+        [MaxLength(10)]
+        public string SpendTime { get; set; }
+
+
+        [Required(ErrorMessage = "{0}必填")]
+        [Display(Name = "金額")]
+        [MaxLength(10)]
+        public string Price { get; set; }
+
+
+        [Display(Name = "描述")] public string Describe { get; set; }
+
+
+        [Display(Name = "備註")] public string Remark { get; set; }
+    }
 }
