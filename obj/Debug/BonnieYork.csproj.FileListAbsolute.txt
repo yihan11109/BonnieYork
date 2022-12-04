@@ -145,5 +145,12 @@ C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.M
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.addHeadShotToAllTable.resources
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.EditVirtualStoreDetail.resources
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.AddVirtualStoreDetail.resources
-C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.csproj.AssemblyReference.cache
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.AddBusinessItemsTable.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.AddStoreHolidayDateTable.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.deleteStoreHolidayDate.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.addHolidayDateToStoreDetail.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.editBusinessInformation.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.csproj.AssemblyReference.cache
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.addStaffWorkItemsToStaffDetail.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.deleteworkIteminstore.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.addworkItemTostaff.resources

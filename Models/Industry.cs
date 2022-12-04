@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
+using Newtonsoft.Json;
 
 namespace BonnieYork.Models
 {
@@ -20,6 +21,7 @@ namespace BonnieYork.Models
         [MaxLength(50)]     //不設長度預設為nvarchar(max)
         [Display(Name = "產業名稱")]
         public string IndustryName { get; set; }
+
 
         public virtual ICollection<StoreDetail> StoreDetail { get; set; }
     }

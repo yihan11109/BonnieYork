@@ -30,12 +30,16 @@ namespace BonnieYork.Controllers
         object result = new { };
 
 
+        /// <summary>
+        /// 店家資訊顯示
+        /// </summary>
         [HttpGet]
+        [JwtAuthFilter]
         [Route("GetInformation")]
         public IHttpActionResult GetInformation()
         {
             var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
-            int storeId = (int)userToken["StoreId"];
+            int storeId = (int)userToken["IdentityId"];
             var bannerPath = db.StoreDetail.Where(s => s.Id == storeId).Select(s => s.BannerPath).ToList();
             JObject bannerJObject = new JObject(); //宣告空物件
             if (bannerPath[0] != null)
@@ -48,22 +52,16 @@ namespace BonnieYork.Controllers
                 bannerJObject[item.Key] = "https://" + Request.RequestUri.Host + "/upload/Banner/" + item.Value;
             }
 
-            var storeInformation = db.StoreDetail.Where(s => s.Id == storeId).Select(s => new
+            var storeInformation = db.StoreDetail.Where(s => s.Id == storeId).Select((s) => new
             {
                 s.StoreName,
-                s.Industry.Id,
+                IndustryId = s.Industry == null ? 0 : s.Industry.Id,
+                IndustryName = s.Industry == null ? null : s.Industry.IndustryName,
                 s.City,
                 s.District,
                 s.Address,
                 s.StaffTitle,
-                s.BusinessInformation.TimeInterval,
-                s.BusinessInformation.WeekdayStartTime,
-                s.BusinessInformation.WeekdayEndTime,
-                s.BusinessInformation.WeekdayBreakTime,
-                s.BusinessInformation.HolidayStartTime,
-                s.BusinessInformation.HolidayEndTime,
-                s.BusinessInformation.HolidayBreakTime,
-                s.BusinessInformation.PublicHoliday,
+                s.BusinessInformation,
                 s.Description,
                 HeadShot = "https://" + Request.RequestUri.Host + "/upload/HeadShot/" + s.HeadShot,
                 s.CellphoneNumber,
@@ -77,7 +75,11 @@ namespace BonnieYork.Controllers
         }
 
 
+        /// <summary>
+        /// 店家資訊存取
+        /// </summary>
         [HttpPost]
+        [JwtAuthFilter]
         [Route("EditInformation")]
         public IHttpActionResult EditInformation(InformationDataView view)
         {
@@ -140,16 +142,6 @@ namespace BonnieYork.Controllers
                 return BadRequest("Description欄位必填");
             }
 
-            if (view.BannerPath == null)
-            {
-                return BadRequest("BannerPath欄位必填");
-            }
-
-            if (view.HeadShot == null)
-            {
-                return BadRequest("HeadShot欄位必填");
-            }
-
 
             foreach (StoreDetail item in storeDetailInDb)
             {
@@ -159,10 +151,12 @@ namespace BonnieYork.Controllers
                     businessInformation.TimeInterval = view.TimeInterval;
                     businessInformation.WeekdayStartTime = view.WeekdayStartTime;
                     businessInformation.WeekdayEndTime = view.WeekdayEndTime;
-                    businessInformation.WeekdayBreakTime = view.WeekdayBreakTime;
+                    businessInformation.WeekdayBreakStart = view.WeekdayBreakStart;
+                    businessInformation.WeekdayBreakEnd = view.WeekdayBreakEnd;
                     businessInformation.HolidayStartTime = view.HolidayStartTime;
                     businessInformation.HolidayEndTime = view.HolidayEndTime;
-                    businessInformation.HolidayBreakTime = view.HolidayBreakTime;
+                    businessInformation.HolidayBreakStart = view.HolidayBreakStart;
+                    businessInformation.HolidayBreakEnd = view.HolidayBreakEnd;
                     businessInformation.PublicHoliday = view.PublicHoliday;
                     item.BusinessInformation = businessInformation;
 
@@ -172,10 +166,12 @@ namespace BonnieYork.Controllers
                     item.BusinessInformation.TimeInterval = view.TimeInterval;
                     item.BusinessInformation.WeekdayStartTime = view.WeekdayStartTime;
                     item.BusinessInformation.WeekdayEndTime = view.WeekdayEndTime;
-                    item.BusinessInformation.WeekdayBreakTime = view.WeekdayBreakTime;
+                    item.BusinessInformation.WeekdayBreakStart = view.WeekdayBreakStart;
+                    item.BusinessInformation.WeekdayBreakEnd = view.WeekdayBreakEnd;
                     item.BusinessInformation.HolidayStartTime = view.HolidayStartTime;
                     item.BusinessInformation.HolidayEndTime = view.HolidayEndTime;
-                    item.BusinessInformation.HolidayBreakTime = view.HolidayBreakTime;
+                    item.BusinessInformation.HolidayBreakStart = view.HolidayBreakStart;
+                    item.BusinessInformation.HolidayBreakEnd = view.HolidayBreakEnd;
                     item.BusinessInformation.PublicHoliday = view.PublicHoliday;
                 }
 
@@ -208,8 +204,11 @@ namespace BonnieYork.Controllers
 
 
 
-
+        /// <summary>
+        /// 店家資訊banner及大頭貼圖片修改
+        /// </summary>
         [HttpPost]
+        [JwtAuthFilter]
         [Route("UploadProfile")]
         public async Task<IHttpActionResult> UploadProfile()
         {
@@ -250,19 +249,19 @@ namespace BonnieYork.Controllers
 
                 // 使用 SixLabors.ImageSharp 調整圖片尺寸 (正方形大頭貼)
                 var image = SixLabors.ImageSharp.Image.Load<Rgba32>(outputPath);
-                //要設定超過一個大小就限制大小
                 var size = image.Size();
-                if (size.Width > 600 && size.Height > 600)
-                {
-                    image.Mutate(x => x.Resize(150, 120)); // 輸入(120, 0)會保持比例出現黑邊
 
-                }
 
                 var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
                 int identityId = (int)userToken["IdentityId"];
 
                 if (imageType == "HeadShot")
-                {
+                {                //要設定超過一個大小就限制大小
+                    if (size.Width > 1280 && size.Height > 1280)
+                    {
+                        image.Mutate(x => x.Resize(0, 640)); // 輸入(120, 0)會保持比例出現黑邊
+
+                    }
                     var storeHeadShot = db.StoreDetail.Where(s => s.Id == identityId).ToList();
                     storeHeadShot[0].HeadShot = fileName;
                     image.Save(outputPath);
@@ -274,6 +273,12 @@ namespace BonnieYork.Controllers
                 }
                 else if (imageType.Contains("Banner"))
                 {
+                    //要設定超過一個大小就限制大小
+                    if (size.Width > 1280 && size.Height > 1280)
+                    {
+                        image.Mutate(x => x.Resize(0, 900)); // 輸入(120, 0)會保持比例出現黑邊
+
+                    }
                     var storeBannerDb = db.StoreDetail.Where(s => s.Id == identityId).ToList();
                     //string storeBanner = storeBannerDb[0];
                     JObject bannerJObject = new JObject();
@@ -304,6 +309,10 @@ namespace BonnieYork.Controllers
             }
         }
 
+
+        /// <summary>
+        /// 店家所有項目顯示
+        /// </summary>
         [HttpGet]
         [JwtAuthFilter]
         [Route("GetAllItems")]
@@ -313,7 +322,7 @@ namespace BonnieYork.Controllers
             int identityId = (int)userToken["IdentityId"];
             var allItems = db.BusinessItems.Where(i => i.StoreId == identityId).Select(i => new
             {
-                i.Id,
+                ItemId = i.Id,
                 i.ItemName,
                 i.SpendTime,
                 i.Price,
@@ -326,6 +335,10 @@ namespace BonnieYork.Controllers
         }
 
 
+
+        /// <summary>
+        /// 店家新增營業項目
+        /// </summary>
         [HttpPost]
         [JwtAuthFilter]
         [Route("AddItems")]
@@ -369,8 +382,11 @@ namespace BonnieYork.Controllers
 
 
 
-
+        /// <summary>
+        /// 店家新增項目圖片
+        /// </summary>
         [HttpPost]
+        [JwtAuthFilter]
         [Route("UploadItemsImage")]
         public async Task<IHttpActionResult> UploadItemsImage()
         {
@@ -408,9 +424,9 @@ namespace BonnieYork.Controllers
                 var image = SixLabors.ImageSharp.Image.Load<Rgba32>(outputPath);
                 //要設定超過一個大小就限制大小
                 var size = image.Size();
-                if (size.Width > 600 && size.Height > 600)
+                if (size.Width > 1280 && size.Height > 1280)
                 {
-                    image.Mutate(x => x.Resize(150, 120)); // 輸入(120, 0)會保持比例出現黑邊
+                    image.Mutate(x => x.Resize(0, 640)); // 輸入(120, 0)會保持比例出現黑邊
 
                 }
 
@@ -432,6 +448,120 @@ namespace BonnieYork.Controllers
                 return BadRequest("照片上傳失敗或未上傳"); // 400
             }
 
+        }
+
+
+
+        /// <summary>
+        /// 店家所有員工資訊
+        /// </summary>
+        [HttpGet]
+        [JwtAuthFilter]
+        [Route("AllStaff")]
+        public IHttpActionResult AllStaff()
+        {
+            var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+            int identityId = (int)userToken["IdentityId"];
+            var AllStaffItem = db.StaffDetail.Where(e => e.StoreId == identityId).Select(e => new
+            {
+                e.Id,
+                e.StaffName,
+                e.JobTitle,
+                BusinessItemsId = e.StaffWorkItems,
+                HeadShot = "https://" + Request.RequestUri.Host + "/upload/ItemsImage/" + e.HeadShot
+            }).ToList();
+
+            return Ok(new { AllStaffItem });
+        }
+
+
+
+        /// <summary>
+        /// 店家項目編輯
+        /// </summary>
+        [HttpPost]
+        [JwtAuthFilter]
+        [Route("EditItems")]
+        public IHttpActionResult EditItems([FromUri] int itemId, [FromBody] AllItems view)
+        {
+            var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+            int identityId = (int)userToken["IdentityId"];
+            var theItem = db.BusinessItems.Where(i => i.StoreId == identityId).Where(i => i.Id == itemId).ToList();
+
+            foreach (BusinessItems item in theItem)
+            {
+                item.ItemName = view.ItemName;
+                item.SpendTime = view.SpendTime;
+                item.Price = view.Price;
+                item.Describe = view.Describe;
+                item.Remark = view.Remark;
+            }
+
+            db.SaveChanges();
+            return Ok(new { Message = "修改成功" });
+        }
+
+
+        /// <summary>
+        /// 店家項目刪除
+        /// </summary>
+        [HttpDelete]
+        [JwtAuthFilter]
+        [Route("DeleteItems")]
+        public IHttpActionResult DeleteItems([FromUri] int itemId)
+        {
+            var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+            int identityId = (int)userToken["IdentityId"];
+            var theItem = db.BusinessItems.Where(i => i.StoreId == identityId).Where(i => i.Id == itemId).ToList();
+            if (theItem.Count > 0)
+            {
+                db.BusinessItems.Remove(theItem[0]);
+                db.SaveChanges();
+                return Ok(new { Message = "刪除成功" });
+            }
+            else
+            {
+                return BadRequest("無此項目id");
+            }
+        }
+
+
+        /// <summary>
+        /// 店家公休日顯示
+        /// </summary>
+        [HttpGet]
+        [JwtAuthFilter]
+        [Route("GetHolidayDate")]
+        public IHttpActionResult GetHolidayDate()
+        {
+            var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+            int identityId = (int)userToken["IdentityId"];
+            var theHoliday = db.StoreDetail.Where(s => s.Id == identityId).Select(s => s.HolidayDate).ToList();
+
+
+            return Ok(new { HolidayDate = theHoliday });
+        }
+
+
+        /// <summary>
+        /// 店家修改公休日
+        /// </summary>
+        [HttpPost]
+        [JwtAuthFilter]
+        [Route("EditHolidayDate")]
+        public IHttpActionResult EditHolidayDate(InformationDataView view)
+        {
+            var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+            int identityId = (int)userToken["IdentityId"];
+            var theHoliday = db.StoreDetail.Where(s => s.Id == identityId).ToList();
+
+            foreach (StoreDetail item in theHoliday)
+            {
+                item.HolidayDate = view.HolidayDate;
+            }
+
+            db.SaveChanges();
+            return Ok(new { Message = "公休日修改成功" });
         }
     }
 }

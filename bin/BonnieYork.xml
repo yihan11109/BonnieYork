@@ -481,6 +481,61 @@
             </summary>
             <param name="documentPath">The physical path to XML document.</param>
         </member>
+        <member name="M:BonnieYork.Controllers.StoreController.GetInformation">
+            <summary>
+            店家資訊顯示
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.StoreController.EditInformation(BonnieYork.Models.InformationDataView)">
+            <summary>
+            店家資訊存取
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.StoreController.UploadProfile">
+            <summary>
+            店家資訊banner及大頭貼圖片修改
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.StoreController.GetAllItems">
+            <summary>
+            店家所有項目顯示
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.StoreController.AddItems(BonnieYork.Models.AllItems)">
+            <summary>
+            店家新增營業項目
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.StoreController.UploadItemsImage">
+            <summary>
+            店家新增項目圖片
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.StoreController.AllStaff">
+            <summary>
+            店家所有員工資訊
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.StoreController.EditItems(System.Int32,BonnieYork.Models.AllItems)">
+            <summary>
+            店家項目編輯
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.StoreController.DeleteItems(System.Int32)">
+            <summary>
+            店家項目刪除
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.StoreController.GetHolidayDate">
+            <summary>
+            店家公休日顯示
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.StoreController.EditHolidayDate(BonnieYork.Models.InformationDataView)">
+            <summary>
+            店家修改公休日
+            </summary>
+        </member>
         <member name="M:BonnieYork.Controllers.UserController.SignUpIsValid(BonnieYork.Models.ViewModel)">
             <summary>
             (註冊)判斷Email是否註冊過

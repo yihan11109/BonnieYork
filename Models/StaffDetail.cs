@@ -73,10 +73,14 @@ namespace BonnieYork.Models
         public string LineLink { get; set; }
 
 
-
-
+        
         [Display(Name = "大頭照")]
         public string HeadShot { get; set; }
+
+
+
+        [Display(Name = "員工工作項目")]
+        public string StaffWorkItems { get; set; }
 
 
         public virtual ICollection<StaffHoliday> StaffHoliday { get; set; }

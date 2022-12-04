@@ -168,7 +168,7 @@ namespace BonnieYork.Models
 
 
         [Display(Name = "員工工作項目ID")]
-        public int BusinessItemsId { get; set; }
+        public string BusinessItemsId { get; set; }
     }
 
     public class ResetPasswordView : ViewModel
@@ -188,7 +188,7 @@ namespace BonnieYork.Models
 
 
         [Required(ErrorMessage = "{0}必填")]
-        [Display(Name = "密碼")]
+        [Display(Name = "確認密碼")]
         [StringLength(100, ErrorMessage = "{0} 長度至少必須為 {2} 個字元。", MinimumLength = 6)]  //最多100個字，最少6個字
         [DataType(DataType.Password)]
         public string CheckPassword { get; set; }
@@ -228,7 +228,7 @@ namespace BonnieYork.Models
 
         //Store
         [Display(Name = "產業別編號")]
-        public int IndustryId { get; set; }
+        public int? IndustryId { get; set; }
 
 
 
@@ -237,6 +237,7 @@ namespace BonnieYork.Models
         [MaxLength(50)]     //不設長度預設為nvarchar(max)
         [Display(Name = "縣市")]
         public string City { get; set; }
+
 
 
         //Store
@@ -286,9 +287,14 @@ namespace BonnieYork.Models
         public string WeekdayEndTime { get; set; }
 
 
-        //Store
-        [Display(Name = "平日休息時間")]
-        public string WeekdayBreakTime { get; set; }
+        [Display(Name = "平日休息開始")]
+        [MaxLength(50)]
+        public string WeekdayBreakStart { get; set; }
+
+
+        [Display(Name = "平日休息結束")]
+        [MaxLength(50)]
+        public string WeekdayBreakEnd { get; set; }
 
 
         //Store
@@ -302,14 +308,24 @@ namespace BonnieYork.Models
         public string HolidayEndTime { get; set; }
 
 
-        //Store
-        [Display(Name = "假日休息時間")]
-        public string HolidayBreakTime { get; set; }
+        [Display(Name = "假日休息開始")]
+        [MaxLength(50)]
+        public string HolidayBreakStart { get; set; }
+
+
+        [Display(Name = "假日休息結束")]
+        [MaxLength(50)]
+        public string HolidayBreakEnd { get; set; }
 
 
         //Store
         [Display(Name = "公休日")]
         public string PublicHoliday { get; set; }
+
+
+
+        [Display(Name = "公休日期")]
+        public string HolidayDate { get; set; }
 
 
 

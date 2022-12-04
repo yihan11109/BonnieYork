@@ -146,3 +146,10 @@ C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.EditVirtualStoreDetail.resources
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.AddVirtualStoreDetail.resources
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.AddBusinessItemsTable.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.AddStoreHolidayDateTable.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.deleteStoreHolidayDate.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.addHolidayDateToStoreDetail.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.editBusinessInformation.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.addStaffWorkItemsToStaffDetail.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.deleteworkIteminstore.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.addworkItemTostaff.resources

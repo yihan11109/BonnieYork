@@ -256,6 +256,34 @@
     <Compile Include="Migrations\202212031650202_AddBusinessItemsTable.Designer.cs">
       <DependentUpon>202212031650202_AddBusinessItemsTable.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202212041023473_AddStoreHolidayDateTable.cs" />
+    <Compile Include="Migrations\202212041023473_AddStoreHolidayDateTable.Designer.cs">
+      <DependentUpon>202212041023473_AddStoreHolidayDateTable.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202212041046230_deleteStoreHolidayDate.cs" />
+    <Compile Include="Migrations\202212041046230_deleteStoreHolidayDate.Designer.cs">
+      <DependentUpon>202212041046230_deleteStoreHolidayDate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202212041049302_addHolidayDateToStoreDetail.cs" />
+    <Compile Include="Migrations\202212041049302_addHolidayDateToStoreDetail.Designer.cs">
+      <DependentUpon>202212041049302_addHolidayDateToStoreDetail.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202212041330177_editBusinessInformation.cs" />
+    <Compile Include="Migrations\202212041330177_editBusinessInformation.Designer.cs">
+      <DependentUpon>202212041330177_editBusinessInformation.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202212041449092_addStaffWorkItemsToStaffDetail.cs" />
+    <Compile Include="Migrations\202212041449092_addStaffWorkItemsToStaffDetail.Designer.cs">
+      <DependentUpon>202212041449092_addStaffWorkItemsToStaffDetail.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202212041555191_deleteworkIteminstore.cs" />
+    <Compile Include="Migrations\202212041555191_deleteworkIteminstore.Designer.cs">
+      <DependentUpon>202212041555191_deleteworkIteminstore.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202212041557107_addworkItemTostaff.cs" />
+    <Compile Include="Migrations\202212041557107_addworkItemTostaff.Designer.cs">
+      <DependentUpon>202212041557107_addworkItemTostaff.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\createAllTable.cs" />
     <Compile Include="Migrations\createAllTable.Designer.cs">
       <DependentUpon>createAllTable.cs</DependentUpon>
@@ -374,6 +402,27 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202212031650202_AddBusinessItemsTable.resx">
       <DependentUpon>202212031650202_AddBusinessItemsTable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202212041023473_AddStoreHolidayDateTable.resx">
+      <DependentUpon>202212041023473_AddStoreHolidayDateTable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202212041046230_deleteStoreHolidayDate.resx">
+      <DependentUpon>202212041046230_deleteStoreHolidayDate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202212041049302_addHolidayDateToStoreDetail.resx">
+      <DependentUpon>202212041049302_addHolidayDateToStoreDetail.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202212041330177_editBusinessInformation.resx">
+      <DependentUpon>202212041330177_editBusinessInformation.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202212041449092_addStaffWorkItemsToStaffDetail.resx">
+      <DependentUpon>202212041449092_addStaffWorkItemsToStaffDetail.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202212041555191_deleteworkIteminstore.resx">
+      <DependentUpon>202212041555191_deleteworkIteminstore.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202212041557107_addworkItemTostaff.resx">
+      <DependentUpon>202212041557107_addworkItemTostaff.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\createAllTable.resx">
       <DependentUpon>createAllTable.cs</DependentUpon>

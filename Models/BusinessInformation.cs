@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
+using Newtonsoft.Json;
 
 namespace BonnieYork.Models
 {
@@ -31,9 +32,14 @@ namespace BonnieYork.Models
         public string WeekdayEndTime { get; set; }
 
 
-        [Display(Name = "平日休息時間")]
+        [Display(Name = "平日休息開始")]
         [MaxLength(50)]
-        public string WeekdayBreakTime { get; set; }
+        public string WeekdayBreakStart { get; set; }
+
+
+        [Display(Name = "平日休息結束")]
+        [MaxLength(50)]
+        public string WeekdayBreakEnd { get; set; }
 
 
         [Display(Name = "假日開始營業時間")]
@@ -46,15 +52,21 @@ namespace BonnieYork.Models
         public string HolidayEndTime { get; set; }
 
 
-        [Display(Name = "假日休息時間")]
+        [Display(Name = "假日休息開始")]
         [MaxLength(50)]
-        public string HolidayBreakTime { get; set; }
+        public string HolidayBreakStart { get; set; }
+
+
+        [Display(Name = "假日休息結束")]
+        [MaxLength(50)]
+        public string HolidayBreakEnd { get; set; }
 
 
         [Display(Name = "公休日")]
         [MaxLength(20)]
         public string PublicHoliday { get; set; }
 
+        [JsonIgnore]
         public virtual ICollection<StoreDetail> StoreDetail { get; set; }
     }
 }

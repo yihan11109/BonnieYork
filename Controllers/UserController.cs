@@ -39,18 +39,18 @@ namespace BonnieYork.Controllers
                 //判斷Email是否註冊過
                 if (hasEmail.Count > 0)
                 {
-                    result = new
-                    {
-                        Message = "已註冊過"
-                    };
-                    return Ok(result);
+                    return BadRequest("已註冊過");
                 }
                 else
                 {
                     //判斷Email是否符合格式
                     if (ModelState.IsValid)
                     {
-                        return BadRequest("未註冊過");
+                        result = new
+                        {
+                            Message = "未註冊過"
+                        };
+                        return Ok(result);
                     }
                     else
                     {
@@ -94,7 +94,7 @@ namespace BonnieYork.Controllers
                 }
             }
 
-            
+
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace BonnieYork.Controllers
             string fromAddress = ConfigurationManager.AppSettings["fromAddress"];
             string toAddress = view.Account.ToLower();
             string subject = "BonnieYork註冊連結確認";
-            string mailBody = "親愛的BonnieYork會員您好："+"<br>此封信件為您在BonnieYork註冊會員時所發送之連結信件，"+ "<br >請點選註冊連結進入頁面以完成註冊。<br ><br>" + "※提醒您，此註冊連結有效期為10分鐘，若連結失效請再次前往註冊頁面重新寄送註冊連結，謝謝您。<br><br>  http://localhost:3000/signup?token=";
+            string mailBody = "親愛的BonnieYork會員您好：" + "<br>此封信件為您在BonnieYork註冊會員時所發送之連結信件，" + "<br >請點選註冊連結進入頁面以完成註冊。<br ><br>" + "※提醒您，此註冊連結有效期為10分鐘，若連結失效請再次前往註冊頁面重新寄送註冊連結，謝謝您。<br><br>  http://localhost:3000/signup?token=";
             string mailBodyEnd = "<br><br>-----此為系統發出信件，請勿直接回覆，感謝您的配合。-----";
             string emailPassword = ConfigurationManager.AppSettings["emailPassword"];
             string token = "";
@@ -115,17 +115,18 @@ namespace BonnieYork.Controllers
             {
                 var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
 
-                if (view.BusinessItemsId != 0)
+                if (view.BusinessItemsId != null)
                 {
+                    int storeId = (int)userToken["StoreId"];
                     userToken["Account"] = view.Account.ToLower();
                     userToken["JobTitle"] = view.JobTitle;
                     userToken["BusinessItemsId"] = view.BusinessItemsId;
-                    token = JwtAuthUtil.StaffSignUpToken(userToken);
+                    token = JwtAuthUtil.GenerateSignUpToken(view.Account.ToLower(), storeId, "staff", view.BusinessItemsId, view.JobTitle);
                 }
             }
             else
             {
-                token = JwtAuthUtil.GenerateSignUpToken(view.Account.ToLower(), 0, view.Identity, 0, "");
+                token = JwtAuthUtil.GenerateSignUpToken(view.Account.ToLower(), 0, view.Identity, "","");
             }
 
             Mail.SendGmailMail(fromAddress, toAddress, subject, mailBody + token + mailBodyEnd, emailPassword);
@@ -148,14 +149,19 @@ namespace BonnieYork.Controllers
         {
             // 取出請求內容，解密 JwtToken 取出資料(每一個都做token檢查)
             var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
-            // ExpRefreshToken() 生成刷新效期 JwtToken 用法
-            JwtAuthUtil jwtAuthUtil = new JwtAuthUtil();
-            //string jwtToken = jwtAuthUtil.ExpRefreshToken(userToken);
-            object result = new
+            var originToken = Request.Headers.Authorization.Parameter;
+            int storeId = (int)userToken["StoreId"];
+            string account = userToken["Account"].ToString();
+            var storeName = db.StoreDetail.Where(s => s.Id == storeId).Select(s => s.StoreName).ToList();
+
+            if (userToken["Identity"].ToString() == "staff")
             {
-                Token = userToken
-            };
-            return Ok(result);
+                return Ok(new { Token = userToken,Account = account, BelongStoreName = storeName , OriginToken = originToken });
+            }
+            else
+            {
+                return Ok(new { Token = userToken });
+            }
         }
 
 
@@ -218,7 +224,7 @@ namespace BonnieYork.Controllers
                     storeDetail.Address = view.Address;
                     storeDetail.CellphoneNumber = view.CellphoneNumber;
 
-                    var storeDetailResult = db.StoreDetail.Add(storeDetail);
+                    db.StoreDetail.Add(storeDetail);
                     db.SaveChanges();
 
                     var storeInformation = db.StoreDetail.Where(s => s.Account == view.Account.ToLower()).ToList();
@@ -233,37 +239,41 @@ namespace BonnieYork.Controllers
                 }
 
             }
-            //else if (view.Identity == "staff")
-            //{
-            //    if (view.Password != view.CheckPassword)
-            //    {
-            //        result = new
-            //        {
-            //            message = "密碼不同"
-            //        };
-            //    }
-            //    else
-            //    {
-            //        var storeId = db.StaffDetail.Where(e => e.Account == view.Account).Select(e => new
-            //        {
-            //            e.StoreId,
-            //            e.JobTitle
-            //        }).ToList();
-            //        staffDetail.Account = view.Account;
-            //        staffDetail.Password = BitConverter.ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.Password))).Replace("-", null);
-            //        staffDetail.StaffName = view.StaffName;
-            //        staffDetail.CellphoneNumber = view.CellphoneNumber;
+            else if (view.Identity == "staff")
+            {
+                if (view.Password != view.CheckPassword)
+                {
+                    result = new
+                    {
+                        message = "密碼不同"
+                    };
+                }
+                else
+                {
+                    var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+                    int storeId = (int)userToken["StoreId"];
 
-            //        db.StaffDetail.Add(staffDetail);
-            //        db.SaveChanges();
+                    staffDetail.StoreId = storeId;
+                    staffDetail.Account = view.Account.ToLower();
+                    staffDetail.Password = BitConverter.ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.Password))).Replace("-", null);
+                    staffDetail.StaffName = view.StaffName;
+                    staffDetail.CellphoneNumber = view.CellphoneNumber;
+                    staffDetail.StaffWorkItems = userToken["BusinessItemId"].ToString();
+                    staffDetail.JobTitle = userToken["JobTitle"].ToString();
 
-            //        result = new
-            //        {
-            //            message = "員工註冊完成"
-            //        };
-            //    }
+                    db.StaffDetail.Add(staffDetail);
+                    db.SaveChanges();
 
-            //}
+                    var staffInformation = db.StaffDetail.Where(e => e.Account == view.Account.ToLower()).ToList();
+
+                    string token = JwtAuthUtil.GenerateToken(staffInformation[0].Id, staffInformation[0].StoreId, view.Account.ToLower(), staffInformation[0].StoreDetail.StoreName, staffInformation[0].StaffName, "", "staff");
+                    result = new
+                    {
+                        message = "員工註冊完成",
+                        Token = token
+                    };
+                }
+            }
             return Ok(result);
         }
 

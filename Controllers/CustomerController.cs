@@ -109,9 +109,9 @@ namespace BonnieYork.Controllers
                 var image = SixLabors.ImageSharp.Image.Load<Rgba32>(outputPath);
                 //要設定超過一個大小就限制大小
                 var size = image.Size();
-                if (size.Width > 600 && size.Height > 600)
+                if (size.Width > 1280 && size.Height > 1280)
                 {
-                    image.Mutate(x => x.Resize(150, 120)); // 輸入(120, 0)會保持比例出現黑邊
+                    image.Mutate(x => x.Resize(0, 640)); // 輸入(120, 0)會保持比例出現黑邊
 
                 }
                 image.Save(outputPath);
@@ -119,7 +119,6 @@ namespace BonnieYork.Controllers
                 int identityId = (int)userToken["IdentityId"];
                 var customerHeadShot = db.CustomerDetail.Where(c => c.Id == identityId).ToList();
                 customerHeadShot[0].HeadShot = fileName;
-                image.Save(outputPath);
                 db.SaveChanges();
 
                 return Ok(new

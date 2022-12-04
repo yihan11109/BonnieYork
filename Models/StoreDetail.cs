@@ -116,8 +116,13 @@ namespace BonnieYork.Models
         public string HeadShot { get; set; }
 
 
+        [Display(Name = "公休日期")]
+        public string HolidayDate { get; set; }
+
+
 
         public virtual ICollection<StaffDetail> StaffDetail { get; set; }
         public virtual ICollection<BusinessItems> BusinessItems { get; set; }
+
     }
 }
