@@ -50,5 +50,7 @@ namespace BonnieYork.Models
 
 
         [Display(Name = "項目圖片")] public string PicturePath { get; set; }
+
+        public virtual ICollection<StaffWorkItems> StaffWorkItems { get; set; }
     }
 }

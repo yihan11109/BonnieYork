@@ -25,6 +25,9 @@ namespace BonnieYork.Controllers
         object result = new { };
 
 
+        /// <summary>
+        /// 顧客資訊顯示
+        /// </summary>
         [HttpGet]
         [Route("GetInformation")]
         public IHttpActionResult GetInformation()
@@ -37,13 +40,16 @@ namespace BonnieYork.Controllers
                c.CustomerName,
                c.CellphoneNumber,
                c.BirthDay,
-               HeadShot = "https://" + Request.RequestUri.Host + "/upload/headshot/" + c.HeadShot,
+               HeadShot = c.HeadShot==null ? null:"https://" + Request.RequestUri.Host + "/upload/headshot/" + c.HeadShot,
             }).ToList();
 
             return Ok(new { Identity = "member", CustomerInformation = customerInformation});
         }
 
 
+        /// <summary>
+        /// 顧客資訊存取
+        /// </summary>
         [HttpPost]
         [Route("EditInformation")]
         public IHttpActionResult EditInformation(InformationDataView view)
@@ -70,7 +76,9 @@ namespace BonnieYork.Controllers
         }
 
 
-
+        /// <summary>
+        /// 顧客大頭照存取
+        /// </summary>
         [HttpPost]
         [Route("UploadProfile")]
         public async Task<IHttpActionResult> UploadProfile()

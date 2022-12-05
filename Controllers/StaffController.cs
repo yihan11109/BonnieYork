@@ -25,13 +25,15 @@ namespace BonnieYork.Controllers
         object result = new { };
 
 
+        /// <summary>
+        /// 員工資訊顯示
+        /// </summary>
         [HttpGet]
         [Route("GetInformation")]
         public IHttpActionResult GetInformation()
         {
             var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
             int identityId = (int)userToken["IdentityId"];
-            int storeId = (int)userToken["StoreId"];
             var staffInformation = db.StaffDetail.Where(e => e.Id == identityId).Select(e => new
             {
                 e.Account,
@@ -41,13 +43,16 @@ namespace BonnieYork.Controllers
                 e.FacebookLink,
                 e.InstagramLink,
                 e.LineLink,
-                HeadShot = "https://" + Request.RequestUri.Host + "/upload/headshot/" + e.HeadShot,
+                HeadShot = e.HeadShot==null? null:"https://" + Request.RequestUri.Host + "/upload/headshot/" + e.HeadShot,
             }).ToList();
-
             return Ok(new { Identity = "staff", StaffInformation = staffInformation });
         }
 
 
+
+        /// <summary>
+        /// 員工資訊存取
+        /// </summary>
         [HttpPost]
         [Route("EditInformation")]
         public IHttpActionResult EditInformation(InformationDataView view)
@@ -72,14 +77,16 @@ namespace BonnieYork.Controllers
 
             result = new
             {
-                Message = "顧客資訊修改完成",
+                Message = "員工資訊修改完成",
                 Token = token,
             };
             return Ok(result);
         }
 
 
-
+        /// <summary>
+        /// 員工大頭照存取
+        /// </summary>
         [HttpPost]
         [Route("UploadProfile")]
         public async Task<IHttpActionResult> UploadProfile()

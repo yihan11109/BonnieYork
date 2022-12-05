@@ -17,7 +17,7 @@ using NSwag.Annotations;
 namespace BonnieYork.Controllers
 {
     [OpenApiTag("User", Description = "登入註冊API")]
-    [RoutePrefix("user")]   //屬性路由前綴
+    [RoutePrefix("user")] //屬性路由前綴
     public class UserController : ApiController
     {
         private BonnieYorkDbContext db = new BonnieYorkDbContext();
@@ -86,15 +86,12 @@ namespace BonnieYork.Controllers
                             return BadRequest(modelErrorMessage[0][0].ErrorMessage);
                         }
                     }
-
                 }
                 else
                 {
                     return BadRequest("無此Identity");
                 }
             }
-
-
         }
 
         /// <summary>
@@ -107,7 +104,9 @@ namespace BonnieYork.Controllers
             string fromAddress = ConfigurationManager.AppSettings["fromAddress"];
             string toAddress = view.Account.ToLower();
             string subject = "BonnieYork註冊連結確認";
-            string mailBody = "親愛的BonnieYork會員您好：" + "<br>此封信件為您在BonnieYork註冊會員時所發送之連結信件，" + "<br >請點選註冊連結進入頁面以完成註冊。<br ><br>" + "※提醒您，此註冊連結有效期為10分鐘，若連結失效請再次前往註冊頁面重新寄送註冊連結，謝謝您。<br><br>  http://localhost:3000/signup?token=";
+            string mailBody = "親愛的BonnieYork會員您好：" + "<br>此封信件為您在BonnieYork註冊會員時所發送之連結信件，" +
+                              "<br >請點選註冊連結進入頁面以完成註冊。<br ><br>" +
+                              "※提醒您，此註冊連結有效期為10分鐘，若連結失效請再次前往註冊頁面重新寄送註冊連結，謝謝您。<br><br>  http://localhost:3000/signup?token=";
             string mailBodyEnd = "<br><br>-----此為系統發出信件，請勿直接回覆，感謝您的配合。-----";
             string emailPassword = ConfigurationManager.AppSettings["emailPassword"];
             string token = "";
@@ -118,15 +117,17 @@ namespace BonnieYork.Controllers
                 if (view.BusinessItemsId != null)
                 {
                     int storeId = (int)userToken["StoreId"];
+                    string storeName = userToken["StoreName"].ToString();
                     userToken["Account"] = view.Account.ToLower();
                     userToken["JobTitle"] = view.JobTitle;
                     userToken["BusinessItemsId"] = view.BusinessItemsId;
-                    token = JwtAuthUtil.GenerateSignUpToken(view.Account.ToLower(), storeId, "staff", view.BusinessItemsId, view.JobTitle);
+                    token = JwtAuthUtil.GenerateSignUpToken(view.Account.ToLower(), storeId, storeName, "staff",
+                        view.BusinessItemsId, view.JobTitle);
                 }
             }
             else
             {
-                token = JwtAuthUtil.GenerateSignUpToken(view.Account.ToLower(), 0, view.Identity, "","");
+                token = JwtAuthUtil.GenerateSignUpToken(view.Account.ToLower(), 0, "", view.Identity, "", "");
             }
 
             Mail.SendGmailMail(fromAddress, toAddress, subject, mailBody + token + mailBodyEnd, emailPassword);
@@ -149,19 +150,9 @@ namespace BonnieYork.Controllers
         {
             // 取出請求內容，解密 JwtToken 取出資料(每一個都做token檢查)
             var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
-            var originToken = Request.Headers.Authorization.Parameter;
-            int storeId = (int)userToken["StoreId"];
-            string account = userToken["Account"].ToString();
-            var storeName = db.StoreDetail.Where(s => s.Id == storeId).Select(s => s.StoreName).ToList();
 
-            if (userToken["Identity"].ToString() == "staff")
-            {
-                return Ok(new { Token = userToken,Account = account, BelongStoreName = storeName , OriginToken = originToken });
-            }
-            else
-            {
-                return Ok(new { Token = userToken });
-            }
+            return Ok(new { Token = userToken });
+
         }
 
 
@@ -229,7 +220,8 @@ namespace BonnieYork.Controllers
 
                     var storeInformation = db.StoreDetail.Where(s => s.Account == view.Account.ToLower()).ToList();
 
-                    string token = JwtAuthUtil.GenerateToken(storeInformation[0].Id, storeInformation[0].Id, view.Account.ToLower(), storeInformation[0].StoreName, "", "", "store");
+                    string token = JwtAuthUtil.GenerateToken(storeInformation[0].Id, storeInformation[0].Id,
+                        view.Account.ToLower(), storeInformation[0].StoreName, "", "", "store");
 
                     result = new
                     {
@@ -250,23 +242,44 @@ namespace BonnieYork.Controllers
                 }
                 else
                 {
-                    var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+                    var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);   //staff註冊信連結的token
                     int storeId = (int)userToken["StoreId"];
 
                     staffDetail.StoreId = storeId;
                     staffDetail.Account = view.Account.ToLower();
-                    staffDetail.Password = BitConverter.ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.Password))).Replace("-", null);
+                    staffDetail.Password = BitConverter
+                        .ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.Password))).Replace("-", null);
                     staffDetail.StaffName = view.StaffName;
                     staffDetail.CellphoneNumber = view.CellphoneNumber;
-                    staffDetail.StaffWorkItems = userToken["BusinessItemId"].ToString();
                     staffDetail.JobTitle = userToken["JobTitle"].ToString();
-
                     db.StaffDetail.Add(staffDetail);
                     db.SaveChanges();
+                    var staffInformation = db.StaffDetail.Where(e => e.Account == view.Account.ToLower()).Select(e => new
+                        {
+                            e.Id,
+                            e.StaffName,
+                            e.StoreId,
+                            e.StoreDetail.StoreName
+                        })
+                        .ToList();
 
-                    var staffInformation = db.StaffDetail.Where(e => e.Account == view.Account.ToLower()).ToList();
+                    StaffWorkItems staffWorkItems = new StaffWorkItems();
+                    string[] stringWorkItem = userToken["BusinessItemId"].ToString().Split(',');
+                    foreach (string item in stringWorkItem)
+                    {
+                        int workItemId = Convert.ToInt32(item);
+                        staffWorkItems.BusinessItemsId = workItemId;
+                        staffWorkItems.StaffId = staffInformation[0].Id;
+                        staffWorkItems.StaffName = staffInformation[0].StaffName;
+                        db.StaffWorkItems.Add(staffWorkItems);
+                        db.SaveChanges();
+                    }
+                    
+                    //staffDetail.StaffWorkItems = userToken["BusinessItemId"].ToString();
 
-                    string token = JwtAuthUtil.GenerateToken(staffInformation[0].Id, staffInformation[0].StoreId, view.Account.ToLower(), staffInformation[0].StoreDetail.StoreName, staffInformation[0].StaffName, "", "staff");
+                    string token = JwtAuthUtil.GenerateToken(staffInformation[0].Id, staffInformation[0].StoreId,
+                        view.Account.ToLower(), staffInformation[0].StoreName,
+                        staffInformation[0].StaffName, "", "staff");
                     result = new
                     {
                         message = "員工註冊完成",
@@ -274,6 +287,7 @@ namespace BonnieYork.Controllers
                     };
                 }
             }
+
             return Ok(result);
         }
 
@@ -283,7 +297,7 @@ namespace BonnieYork.Controllers
         /// </summary>
         [HttpPost]
         [Route("Login")]
-        public IHttpActionResult Login(SignUpUserDataView view) // 還沒加staff
+        public IHttpActionResult Login(SignUpUserDataView view)
         {
             object result = new { };
             if (view.Identity == "member")
@@ -296,7 +310,7 @@ namespace BonnieYork.Controllers
 
                 if (passwordChecked.Count > 0)
                 {
-                    var customerInformation = db.CustomerDetail
+                    var customerInformation = db.CustomerDetail.Where(c => c.Account == view.Account.ToLower())
                         .Select(c => new
                         {
                             c.Id,
@@ -313,6 +327,10 @@ namespace BonnieYork.Controllers
                         Message = "已登入",
                         Token = token
                     };
+                }
+                else if (passwordChecked.Count <= 0)
+                {
+                    return BadRequest("未註冊過");
                 }
                 else
                 {
@@ -331,12 +349,14 @@ namespace BonnieYork.Controllers
 
                 if (StorePasswordChecked.Count > 0)
                 {
-                    var storeInformation = db.StoreDetail.Select(s => new
-                    {
-                        s.Id,
-                        s.StoreName
-                    }).ToList();
-                    string token = JwtAuthUtil.GenerateToken(storeInformation[0].Id, storeInformation[0].Id, view.Account.ToLower(), storeInformation[0].StoreName, "", "", "store");
+                    var storeInformation = db.StoreDetail.Where(s => s.Account == view.Account.ToLower()).Select(s =>
+                        new
+                        {
+                            s.Id,
+                            s.StoreName
+                        }).ToList();
+                    string token = JwtAuthUtil.GenerateToken(storeInformation[0].Id, storeInformation[0].Id,
+                        view.Account.ToLower(), storeInformation[0].StoreName, "", "", "store");
                     result = new
                     {
                         Identity = "store",
@@ -349,25 +369,31 @@ namespace BonnieYork.Controllers
                 }
                 else if (StaffPasswordChecked.Count > 0)
                 {
-                    var staffInformation = db.StaffDetail.Select(e => new
-                    {
-                        e.Id,
-                        e.StaffName,
-                        e.StoreId
-                    }).ToList();
-                    var storeName = db.StoreDetail.Where(s => s.Id == staffInformation[0].StoreId).ToList();
+                    var staffInformation = db.StaffDetail.Where(e => e.Account == view.Account.ToLower()).Select(e =>
+                        new
+                        {
+                            e.Id,
+                            e.StoreId,
+                            e.StaffName,
+                            e.StoreDetail.StoreName
+                        }).ToList();
 
-                    string token = JwtAuthUtil.GenerateToken(staffInformation[0].Id, staffInformation[0].StoreId, view.Account.ToLower(), storeName[0].StoreName, staffInformation[0].StaffName, "", "staff");
+                    string token = JwtAuthUtil.GenerateToken(staffInformation[0].Id, staffInformation[0].StoreId,
+                        view.Account.ToLower(), staffInformation[0].StoreName, staffInformation[0].StaffName, "", "staff");
                     result = new
                     {
                         Identity = "staff",
                         Id = staffInformation[0].Id,
                         StoreId = staffInformation[0].StoreId,
-                        StoreName = storeName[0].StoreName,
+                        StoreName = staffInformation[0].StoreName,
                         StaffName = staffInformation[0].StaffName,
                         Message = "已登入",
                         Token = token
                     };
+                }
+                else if (StorePasswordChecked.Count <= 0 && StaffPasswordChecked.Count <= 0)
+                {
+                    return BadRequest("未註冊過");
                 }
                 else
                 {
@@ -393,7 +419,8 @@ namespace BonnieYork.Controllers
 
             if (userToken["Identity"].ToString() == "member")
             {
-                string hashPassword = BitConverter.ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.OriginalPassword)))
+                string hashPassword = BitConverter
+                    .ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.OriginalPassword)))
                     .Replace("-", null);
 
                 var passwordInDb = db.CustomerDetail.Where(c => c.Password == hashPassword).ToList();
@@ -406,7 +433,9 @@ namespace BonnieYork.Controllers
                     }
                     else
                     {
-                        string newHashPassword = BitConverter.ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.CheckPassword))).Replace("-", null);
+                        string newHashPassword = BitConverter
+                            .ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.CheckPassword)))
+                            .Replace("-", null);
 
                         foreach (CustomerDetail item in passwordInDb)
                         {
@@ -427,7 +456,9 @@ namespace BonnieYork.Controllers
             }
             else if (userToken["Identity"].ToString() == "store")
             {
-                string hashPassword = BitConverter.ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.OriginalPassword))).Replace("-", null);
+                string hashPassword = BitConverter
+                    .ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.OriginalPassword)))
+                    .Replace("-", null);
                 var passwordInDb = db.StoreDetail.Where(s => s.Password == hashPassword).ToList();
                 if (passwordInDb.Count > 0)
                 {
@@ -437,7 +468,9 @@ namespace BonnieYork.Controllers
                     }
                     else
                     {
-                        string newHashPassword = BitConverter.ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.CheckPassword))).Replace("-", null);
+                        string newHashPassword = BitConverter
+                            .ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.CheckPassword)))
+                            .Replace("-", null);
 
                         foreach (StoreDetail item in passwordInDb)
                         {
@@ -454,7 +487,8 @@ namespace BonnieYork.Controllers
             }
             else if (userToken["Identity"].ToString() == "staff")
             {
-                string hashPassword = BitConverter.ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.OriginalPassword)))
+                string hashPassword = BitConverter
+                    .ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.OriginalPassword)))
                     .Replace("-", null);
                 var passwordInDb = db.StaffDetail.Where(e => e.Password == hashPassword).ToList();
                 if (passwordInDb.Count > 0)
@@ -465,7 +499,9 @@ namespace BonnieYork.Controllers
                     }
                     else
                     {
-                        string newHashPassword = BitConverter.ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.CheckPassword))).Replace("-", null);
+                        string newHashPassword = BitConverter
+                            .ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.CheckPassword)))
+                            .Replace("-", null);
 
                         foreach (StaffDetail item in passwordInDb)
                         {
@@ -495,6 +531,34 @@ namespace BonnieYork.Controllers
         {
             object result = new { };
             var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+            string identity = userToken["Identity"].ToString();
+            int identityId = (int)userToken["IdentityId"];
+            string headShot = null;
+
+            if (identity == "member")
+            {
+                var theHeadShot = db.CustomerDetail.Where(c => c.Id == identityId).Select(c => c.HeadShot).ToList();
+                if (theHeadShot[0] != null)
+                {
+                    headShot = "https://" + Request.RequestUri.Host + "/upload/HeadShot/" + theHeadShot[0];
+                }
+            }
+            else if (identity == "store")
+            {
+                var theHeadShot = db.StoreDetail.Where(s => s.Id == identityId).Select(s => s.HeadShot).ToList();
+                if (theHeadShot[0] != null)
+                {
+                    headShot = "https://" + Request.RequestUri.Host + "/upload/HeadShot/" + theHeadShot[0];
+                }
+            }
+            else
+            {
+                var theHeadShot = db.StaffDetail.Where(s => s.Id == identityId).Select(s => s.HeadShot).ToList();
+                if (theHeadShot[0] != null)
+                {
+                    headShot = "https://" + Request.RequestUri.Host + "/upload/HeadShot/" + theHeadShot[0];
+                }
+            }
             result = new
             {
                 Message = "有效的JwtToken",
@@ -505,10 +569,12 @@ namespace BonnieYork.Controllers
                 StoreName = userToken["StoreName"],
                 StaffName = userToken["StaffName"],
                 CustomerName = userToken["CustomerName"],
-
+                HeadShot = headShot
             };
             return Ok(result);
         }
-
     }
 }
+
+
+

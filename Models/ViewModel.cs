@@ -380,7 +380,7 @@ namespace BonnieYork.Models
 
 
         [Display(Name = "員工工作項目ID")]
-        public int BusinessItemsId { get; set; }
+        public string BusinessItemsId { get; set; }
     }
 
 

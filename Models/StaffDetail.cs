@@ -79,10 +79,6 @@ namespace BonnieYork.Models
 
 
 
-        [Display(Name = "員工工作項目")]
-        public string StaffWorkItems { get; set; }
-
-
         public virtual ICollection<StaffHoliday> StaffHoliday { get; set; }
     }
 }

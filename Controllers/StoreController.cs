@@ -52,6 +52,9 @@ namespace BonnieYork.Controllers
                 bannerJObject[item.Key] = "https://" + Request.RequestUri.Host + "/upload/Banner/" + item.Value;
             }
 
+            var businessInformation =
+                db.StoreDetail.Where(s => s.Id == storeId).Select(s => s.BusinessInformationId).ToList();
+
             var storeInformation = db.StoreDetail.Where(s => s.Id == storeId).Select((s) => new
             {
                 s.StoreName,
@@ -60,19 +63,28 @@ namespace BonnieYork.Controllers
                 s.City,
                 s.District,
                 s.Address,
-                s.StaffTitle,
-                s.BusinessInformation,
+                JobTitle = s.StaffTitle,
                 s.Description,
-                HeadShot = "https://" + Request.RequestUri.Host + "/upload/HeadShot/" + s.HeadShot,
+                HeadShot = s.HeadShot == null ? null : "https://" + Request.RequestUri.Host + "/upload/HeadShot/" + s.HeadShot,
                 s.CellphoneNumber,
                 s.PhoneNumber,
+                TimeInterval = s.BusinessInformation == null ? "" : s.BusinessInformation.TimeInterval,
+                WeekdayStartTime = s.BusinessInformation == null ? "" : s.BusinessInformation.WeekdayStartTime,
+                WeekdayEndTime = s.BusinessInformation == null ? "" : s.BusinessInformation.WeekdayEndTime,
+                WeekdayBreakStart = s.BusinessInformation == null ? "" : s.BusinessInformation.WeekdayBreakStart,
+                WeekdayBreakEnd = s.BusinessInformation == null ? "" : s.BusinessInformation.WeekdayBreakEnd,
+                HolidayStartTime = s.BusinessInformation == null ? "" : s.BusinessInformation.HolidayStartTime,
+                HolidayEndTime = s.BusinessInformation == null ? "" : s.BusinessInformation.HolidayEndTime,
+                HolidayBreakStart = s.BusinessInformation == null ? "" : s.BusinessInformation.HolidayBreakStart,
+                HolidayBreakEnd = s.BusinessInformation == null ? "" : s.BusinessInformation.HolidayBreakEnd,
+                PublicHoliday = s.BusinessInformation == null ? "" : s.BusinessInformation.PublicHoliday, 
                 s.FacebookLink,
                 s.InstagramLink,
                 s.LineLink
             }).ToList();
-
             return Ok(new { Identity = "store", StoreInformation = storeInformation, BannerPath = bannerJObject });
         }
+
 
 
         /// <summary>
@@ -87,9 +99,9 @@ namespace BonnieYork.Controllers
             int identityId = (int)userToken["IdentityId"];
             var storeDetailInDb = db.StoreDetail.Where(s => s.Id == identityId).ToList();
 
-            if (view.IndustryId == null)
+            if (view.IndustryId == null || view.IndustryId == 0)
             {
-                return BadRequest($"{view.IndustryId}欄位必填");
+                return BadRequest("IndustryId欄位必填");
             }
 
             if (view.City == null)
@@ -180,7 +192,7 @@ namespace BonnieYork.Controllers
                 item.City = view.City;
                 item.District = view.District;
                 item.Address = view.Address;
-                item.StaffTitle = view.StaffTitle;
+                item.StaffTitle = view.JobTitle;
                 item.Description = view.Description;
                 item.FacebookLink = view.FacebookLink;
                 item.InstagramLink = view.InstagramLink;
@@ -194,12 +206,7 @@ namespace BonnieYork.Controllers
             string token = JwtAuthUtil.GenerateToken(storeDetailInDb[0].Id, storeDetailInDb[0].Id,
                 storeDetailInDb[0].Account, storeDetailInDb[0].StoreName, "", "", "store");
 
-            result = new
-            {
-                Message = "店鋪資訊修改完成",
-                Token = token,
-            };
-            return Ok(result);
+            return Ok(new { Message = "店鋪資訊修改完成" });
         }
 
 
@@ -231,7 +238,7 @@ namespace BonnieYork.Controllers
                 string fileType = fileNameData.Remove(0, fileNameData.LastIndexOf('.')); // .jpg
 
                 // 定義檔案名稱
-                string fileName = "UserName" + "Profile" + DateTime.Now.ToString("yyyyMMddHHmmss") + fileType;
+                string fileName = "UserName" + "Profile" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + fileType;
 
 
                 // 儲存圖片，單檔用.FirstOrDefault()直接取出，多檔需用迴圈
@@ -271,7 +278,7 @@ namespace BonnieYork.Controllers
                         Message = "照片上傳成功",
                     });
                 }
-                else if (imageType.Contains("Banner"))
+                else if (imageType=="Banner1"|| imageType == "Banner2" || imageType == "Banner3" || imageType == "Banner4" || imageType == "Banner5")
                 {
                     //要設定超過一個大小就限制大小
                     if (size.Width > 1280 && size.Height > 1280)
@@ -327,7 +334,7 @@ namespace BonnieYork.Controllers
                 i.SpendTime,
                 i.Price,
                 i.Describe,
-                PicturePath = "https://" + Request.RequestUri.Host + "/upload/ItemsImage/" + i.PicturePath,
+                PicturePath = i.PicturePath == null ? i.PicturePath : "https://" + Request.RequestUri.Host + "/upload/ItemsImage/" + i.PicturePath,
 
             }).ToList();
 
@@ -467,11 +474,55 @@ namespace BonnieYork.Controllers
                 e.Id,
                 e.StaffName,
                 e.JobTitle,
-                BusinessItemsId = e.StaffWorkItems,
-                HeadShot = "https://" + Request.RequestUri.Host + "/upload/ItemsImage/" + e.HeadShot
+                HeadShot = e.HeadShot == null ? e.HeadShot : "https://" + Request.RequestUri.Host + "/upload/ItemsImage/" + e.HeadShot,
             }).ToList();
 
             return Ok(new { AllStaffItem });
+        }
+
+
+
+        /// <summary>
+        /// 店家編輯員工
+        /// </summary>
+        [HttpPost]
+        [JwtAuthFilter]
+        [Route("EditStaff")]
+        public IHttpActionResult EditStaff([FromUri] int staffId, [FromBody] InformationDataView view)
+        {
+            var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+            int identityId = (int)userToken["IdentityId"];
+            var staffInformaiton = db.StaffDetail.Where(e => e.StoreId == identityId).Where(e => e.Id == staffId).ToList();
+            foreach (StaffDetail item in staffInformaiton)
+            {
+                item.JobTitle = view.JobTitle;
+            }
+            db.SaveChanges();
+            return Ok(new { Message = "員工資料編輯完成" });
+        }
+
+
+        /// <summary>
+        /// 店家刪除員工
+        /// </summary>
+        [HttpDelete]
+        [JwtAuthFilter]
+        [Route("DeleteStaff")]
+        public IHttpActionResult DeleteStaff([FromUri] int staffId)
+        {
+            var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+            int identityId = (int)userToken["IdentityId"];
+            var staffInformaiton = db.StaffDetail.Where(e => e.StoreId == identityId).Where(e => e.Id == staffId).ToList();
+            if (staffInformaiton.Count > 0)
+            {
+                db.StaffDetail.Remove(staffInformaiton[0]);
+                db.SaveChanges();
+                return Ok(new { Message = "刪除成功" });
+            }
+            else
+            {
+                return BadRequest("無此項目id");
+            }
         }
 
 

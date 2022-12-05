@@ -154,3 +154,6 @@ C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.c
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.addStaffWorkItemsToStaffDetail.resources
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.deleteworkIteminstore.resources
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.addworkItemTostaff.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.AddStaffWorkItems.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.editStaffWorkItems.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.updateStaffWorkItems.resources

@@ -481,6 +481,36 @@
             </summary>
             <param name="documentPath">The physical path to XML document.</param>
         </member>
+        <member name="M:BonnieYork.Controllers.CustomerController.GetInformation">
+            <summary>
+            顧客資訊顯示
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.CustomerController.EditInformation(BonnieYork.Models.InformationDataView)">
+            <summary>
+            顧客資訊存取
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.CustomerController.UploadProfile">
+            <summary>
+            顧客大頭照存取
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.StaffController.GetInformation">
+            <summary>
+            員工資訊顯示
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.StaffController.EditInformation(BonnieYork.Models.InformationDataView)">
+            <summary>
+            員工資訊存取
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.StaffController.UploadProfile">
+            <summary>
+            員工大頭照存取
+            </summary>
+        </member>
         <member name="M:BonnieYork.Controllers.StoreController.GetInformation">
             <summary>
             店家資訊顯示
@@ -514,6 +544,16 @@
         <member name="M:BonnieYork.Controllers.StoreController.AllStaff">
             <summary>
             店家所有員工資訊
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.StoreController.EditStaff(System.Int32,BonnieYork.Models.InformationDataView)">
+            <summary>
+            店家編輯員工
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.StoreController.DeleteStaff(System.Int32)">
+            <summary>
+            店家刪除員工
             </summary>
         </member>
         <member name="M:BonnieYork.Controllers.StoreController.EditItems(System.Int32,BonnieYork.Models.AllItems)">
