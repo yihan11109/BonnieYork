@@ -377,13 +377,14 @@ namespace BonnieYork.Controllers
             addItems.Describe = view.Describe;
             addItems.Remark = view.Remark;
 
-            db.BusinessItems.Add(addItems);
+            var theItemId = db.BusinessItems.Add(addItems);
             db.SaveChanges();
 
 
             return Ok(new
             {
                 Message = "項目新增成功",
+                TheItemId = theItemId.Id
             });
         }
 
@@ -393,9 +394,8 @@ namespace BonnieYork.Controllers
         /// 店家新增項目圖片
         /// </summary>
         [HttpPost]
-        [JwtAuthFilter]
         [Route("UploadItemsImage")]
-        public async Task<IHttpActionResult> UploadItemsImage()
+        public async Task<IHttpActionResult> UploadItemsImage([FromUri]int theItemId)
         {
             // 檢查請求是否包含 multipart/form-data.
             if (!Request.Content.IsMimeMultipartContent())
@@ -434,13 +434,10 @@ namespace BonnieYork.Controllers
                 if (size.Width > 1280 && size.Height > 1280)
                 {
                     image.Mutate(x => x.Resize(0, 640)); // 輸入(120, 0)會保持比例出現黑邊
-
                 }
 
                 image.Save(outputPath);
-                var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
-                int identityId = (int)userToken["IdentityId"];
-                var itemsImagePath = db.BusinessItems.Where(b => b.StoreId == identityId).ToList();
+                var itemsImagePath = db.BusinessItems.Where(b => b.Id == theItemId).ToList();
                 itemsImagePath[0].PicturePath = fileName;
                 image.Save(outputPath);
                 db.SaveChanges();
@@ -497,6 +494,19 @@ namespace BonnieYork.Controllers
             {
                 item.JobTitle = view.JobTitle;
             }
+            StaffWorkItems staffWorkItems = new StaffWorkItems();
+            string[] stringWorkItem = view.BusinessItemsId.ToString().Split(',');
+            foreach (string item in stringWorkItem)
+            {
+                //把編輯後的員工
+                int workItemId = Convert.ToInt32(item);
+                staffWorkItems.BusinessItemsId = workItemId;
+                staffWorkItems.StaffId = staffId;
+                staffWorkItems.StaffName = staffInformaiton[0].StaffName;
+                db.StaffWorkItems.Add(staffWorkItems);
+                db.SaveChanges();
+            }
+
             db.SaveChanges();
             return Ok(new { Message = "員工資料編輯完成" });
         }
@@ -613,6 +623,23 @@ namespace BonnieYork.Controllers
 
             db.SaveChanges();
             return Ok(new { Message = "公休日修改成功" });
+        }
+
+
+        /// <summary>
+        /// 所有店家顯示
+        /// </summary>
+        [HttpGet]
+        [JwtAuthFilter]
+        [Route("GetAllStore")]
+        public IHttpActionResult GetAllStore()
+        {
+            var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+            int identityId = (int)userToken["IdentityId"];
+            var theHoliday = db.StoreDetail.Where(s => s.Id == identityId).Select(s => s.HolidayDate).ToList();
+
+
+            return Ok(new { HolidayDate = theHoliday });
         }
     }
 }

@@ -53,5 +53,8 @@ namespace BonnieYork.Models
 
         [Display(Name = "大頭照")]
         public string HeadShot { get; set; }
+
+
+        public virtual ICollection<CustomerReserve> CustomerReserve { get; set; }
     }
 }

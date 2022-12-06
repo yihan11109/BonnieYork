@@ -220,8 +220,7 @@ namespace BonnieYork.Controllers
 
                     var storeInformation = db.StoreDetail.Where(s => s.Account == view.Account.ToLower()).ToList();
 
-                    string token = JwtAuthUtil.GenerateToken(storeInformation[0].Id, storeInformation[0].Id,
-                        view.Account.ToLower(), storeInformation[0].StoreName, "", "", "store");
+                    string token = JwtAuthUtil.GenerateToken(storeInformation[0].Id, storeInformation[0].Id, view.Account.ToLower(), storeInformation[0].StoreName, "", "", "store");
 
                     result = new
                     {
@@ -277,9 +276,7 @@ namespace BonnieYork.Controllers
                     
                     //staffDetail.StaffWorkItems = userToken["BusinessItemId"].ToString();
 
-                    string token = JwtAuthUtil.GenerateToken(staffInformation[0].Id, staffInformation[0].StoreId,
-                        view.Account.ToLower(), staffInformation[0].StoreName,
-                        staffInformation[0].StaffName, "", "staff");
+                    string token = JwtAuthUtil.GenerateToken(staffInformation[0].Id, staffInformation[0].StoreId, view.Account.ToLower(), staffInformation[0].StoreName, staffInformation[0].StaffName, "", "staff");
                     result = new
                     {
                         message = "員工註冊完成",
@@ -327,10 +324,6 @@ namespace BonnieYork.Controllers
                         Message = "已登入",
                         Token = token
                     };
-                }
-                else if (passwordChecked.Count <= 0)
-                {
-                    return BadRequest("未註冊過");
                 }
                 else
                 {
@@ -390,10 +383,6 @@ namespace BonnieYork.Controllers
                         Message = "已登入",
                         Token = token
                     };
-                }
-                else if (StorePasswordChecked.Count <= 0 && StaffPasswordChecked.Count <= 0)
-                {
-                    return BadRequest("未註冊過");
                 }
                 else
                 {

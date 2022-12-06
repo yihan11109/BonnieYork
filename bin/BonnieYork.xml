@@ -536,7 +536,7 @@
             店家新增營業項目
             </summary>
         </member>
-        <member name="M:BonnieYork.Controllers.StoreController.UploadItemsImage">
+        <member name="M:BonnieYork.Controllers.StoreController.UploadItemsImage(System.Int32)">
             <summary>
             店家新增項目圖片
             </summary>
