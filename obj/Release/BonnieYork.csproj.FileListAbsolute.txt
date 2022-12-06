@@ -156,3 +156,10 @@ C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.AddStaffWorkItems.resources
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.editStaffWorkItems.resources
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.updateStaffWorkItems.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.AddCustomerReserveTable.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.editCustomerReserve.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.editCustomerReserve2.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.editCustomerReserve3.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.editCustomerReserve31.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.editCustomerReserve4.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.editCustomerReserve5.resources

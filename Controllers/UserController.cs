@@ -127,7 +127,7 @@ namespace BonnieYork.Controllers
             }
             else
             {
-                token = JwtAuthUtil.GenerateSignUpToken(view.Account.ToLower(), 0, "", view.Identity, "", "");
+                token = JwtAuthUtil.GenerateSignUpToken(view.Account.ToLower(), 0, "", view.Identity, null, "");
             }
 
             Mail.SendGmailMail(fromAddress, toAddress, subject, mailBody + token + mailBodyEnd, emailPassword);
@@ -263,8 +263,7 @@ namespace BonnieYork.Controllers
                         .ToList();
 
                     StaffWorkItems staffWorkItems = new StaffWorkItems();
-                    string[] stringWorkItem = userToken["BusinessItemId"].ToString().Split(',');
-                    foreach (string item in stringWorkItem)
+                    foreach (int item in (int[])userToken["BusinessItemId"])
                     {
                         int workItemId = Convert.ToInt32(item);
                         staffWorkItems.BusinessItemsId = workItemId;

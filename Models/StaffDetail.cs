@@ -80,6 +80,5 @@ namespace BonnieYork.Models
 
 
         public virtual ICollection<StaffHoliday> StaffHoliday { get; set; }
-        public virtual ICollection<CustomerReserve> CustomerReserve { get; set; }
     }
 }

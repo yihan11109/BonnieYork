@@ -576,6 +576,11 @@
             店家修改公休日
             </summary>
         </member>
+        <member name="M:BonnieYork.Controllers.StoreController.Calendar">
+            <summary>
+            店家行事曆顯示
+            </summary>
+        </member>
         <member name="M:BonnieYork.Controllers.UserController.SignUpIsValid(BonnieYork.Models.ViewModel)">
             <summary>
             (註冊)判斷Email是否註冊過

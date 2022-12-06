@@ -296,6 +296,42 @@
     <Compile Include="Migrations\202212051613030_updateStaffWorkItems.Designer.cs">
       <DependentUpon>202212051613030_updateStaffWorkItems.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202212060459324_AddCustomerReserveTable.cs" />
+    <Compile Include="Migrations\202212060459324_AddCustomerReserveTable.Designer.cs">
+      <DependentUpon>202212060459324_AddCustomerReserveTable.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202212060727555_editCustomerReserve.cs" />
+    <Compile Include="Migrations\202212060727555_editCustomerReserve.Designer.cs">
+      <DependentUpon>202212060727555_editCustomerReserve.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202212060858043_editCustomerReserve2.cs" />
+    <Compile Include="Migrations\202212060858043_editCustomerReserve2.Designer.cs">
+      <DependentUpon>202212060858043_editCustomerReserve2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202212060927315_editCustomerReserve3.cs" />
+    <Compile Include="Migrations\202212060927315_editCustomerReserve3.Designer.cs">
+      <DependentUpon>202212060927315_editCustomerReserve3.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202212061209378_editCustomerReserve31.cs" />
+    <Compile Include="Migrations\202212061209378_editCustomerReserve31.Designer.cs">
+      <DependentUpon>202212061209378_editCustomerReserve31.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202212061228580_editCustomerReserve4.cs" />
+    <Compile Include="Migrations\202212061228580_editCustomerReserve4.Designer.cs">
+      <DependentUpon>202212061228580_editCustomerReserve4.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202212061230086_editCustomerReserve5.cs" />
+    <Compile Include="Migrations\202212061230086_editCustomerReserve5.Designer.cs">
+      <DependentUpon>202212061230086_editCustomerReserve5.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202212061603557_editCustomerReserve6.cs" />
+    <Compile Include="Migrations\202212061603557_editCustomerReserve6.Designer.cs">
+      <DependentUpon>202212061603557_editCustomerReserve6.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202212061605220_editCustomerReserve7.cs" />
+    <Compile Include="Migrations\202212061605220_editCustomerReserve7.Designer.cs">
+      <DependentUpon>202212061605220_editCustomerReserve7.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\createAllTable.cs" />
     <Compile Include="Migrations\createAllTable.Designer.cs">
       <DependentUpon>createAllTable.cs</DependentUpon>
@@ -446,6 +482,33 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202212051613030_updateStaffWorkItems.resx">
       <DependentUpon>202212051613030_updateStaffWorkItems.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202212060459324_AddCustomerReserveTable.resx">
+      <DependentUpon>202212060459324_AddCustomerReserveTable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202212060727555_editCustomerReserve.resx">
+      <DependentUpon>202212060727555_editCustomerReserve.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202212060858043_editCustomerReserve2.resx">
+      <DependentUpon>202212060858043_editCustomerReserve2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202212060927315_editCustomerReserve3.resx">
+      <DependentUpon>202212060927315_editCustomerReserve3.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202212061209378_editCustomerReserve31.resx">
+      <DependentUpon>202212061209378_editCustomerReserve31.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202212061228580_editCustomerReserve4.resx">
+      <DependentUpon>202212061228580_editCustomerReserve4.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202212061230086_editCustomerReserve5.resx">
+      <DependentUpon>202212061230086_editCustomerReserve5.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202212061603557_editCustomerReserve6.resx">
+      <DependentUpon>202212061603557_editCustomerReserve6.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202212061605220_editCustomerReserve7.resx">
+      <DependentUpon>202212061605220_editCustomerReserve7.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\createAllTable.resx">
       <DependentUpon>createAllTable.cs</DependentUpon>

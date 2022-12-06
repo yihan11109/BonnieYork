@@ -14,7 +14,7 @@ namespace BonnieYork.JWT
 {
     public class JwtAuthUtil
     {
-        public static string GenerateSignUpToken(string account,int storeId, string storeName,string identity,string businessItemId,string jobTitle)   //註冊連結Token
+        public static string GenerateSignUpToken(string account,int storeId, string storeName,string identity,int[] businessItemId,string jobTitle)   //註冊連結Token
         {
             // 自訂字串，驗證用，用來加密送出的 key 
             string secretKey = WebConfigurationManager.AppSettings["TokenKey"];

@@ -168,7 +168,7 @@ namespace BonnieYork.Models
 
 
         [Display(Name = "員工工作項目ID")]
-        public string BusinessItemsId { get; set; }
+        public int[] BusinessItemsId { get; set; }
     }
 
     public class ResetPasswordView : ViewModel

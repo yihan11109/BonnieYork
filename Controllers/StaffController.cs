@@ -104,7 +104,14 @@ namespace BonnieYork.Controllers
             {
                 // 讀取 MIME 資料
                 var provider = new MultipartMemoryStreamProvider();
-                await Request.Content.ReadAsMultipartAsync(provider);
+                try
+                {
+                    await Request.Content.ReadAsMultipartAsync(provider);
+                }
+                catch
+                {
+                    return BadRequest("檔案超過限制大小");
+                }
 
                 // 取得檔案副檔名，單檔用.FirstOrDefault()直接取出，多檔需用迴圈
                 string fileNameData = provider.Contents.FirstOrDefault().Headers.ContentDisposition.FileName.Trim('\"');
@@ -115,6 +122,10 @@ namespace BonnieYork.Controllers
 
                 // 儲存圖片，單檔用.FirstOrDefault()直接取出，多檔需用迴圈
                 var fileBytes = await provider.Contents.FirstOrDefault().ReadAsByteArrayAsync();
+                if (fileBytes.Length > 5000000)
+                {
+                    return BadRequest("檔案超過限制大小");
+                }
                 var outputPath = Path.Combine(root, fileName);
                 using (var output = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
                 {

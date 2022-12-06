@@ -77,7 +77,7 @@ namespace BonnieYork.Controllers
                 HolidayEndTime = s.BusinessInformation == null ? "" : s.BusinessInformation.HolidayEndTime,
                 HolidayBreakStart = s.BusinessInformation == null ? "" : s.BusinessInformation.HolidayBreakStart,
                 HolidayBreakEnd = s.BusinessInformation == null ? "" : s.BusinessInformation.HolidayBreakEnd,
-                PublicHoliday = s.BusinessInformation == null ? "" : s.BusinessInformation.PublicHoliday, 
+                PublicHoliday = s.BusinessInformation == null ? "" : s.BusinessInformation.PublicHoliday,
                 s.FacebookLink,
                 s.InstagramLink,
                 s.LineLink
@@ -228,9 +228,15 @@ namespace BonnieYork.Controllers
             string root = HttpContext.Current.Server.MapPath(@"~/upload/HeadShot");
             try
             {
-                // 讀取 MIME 資料
                 var provider = new MultipartMemoryStreamProvider();
-                await Request.Content.ReadAsMultipartAsync(provider);
+                try
+                {
+                    await Request.Content.ReadAsMultipartAsync(provider);
+                }
+                catch
+                {
+                    return BadRequest("檔案超過限制大小");
+                }
 
                 // 取得檔案副檔名，單檔用.FirstOrDefault()直接取出，多檔需用迴圈
                 string fileNameData = provider.Contents.FirstOrDefault().Headers.ContentDisposition.FileName.Trim('\"');
@@ -242,13 +248,15 @@ namespace BonnieYork.Controllers
 
 
                 // 儲存圖片，單檔用.FirstOrDefault()直接取出，多檔需用迴圈
-                var fileBytes = await provider.Contents.FirstOrDefault().ReadAsByteArrayAsync();
+                var fileBytes = new byte[] { };
+                fileBytes = await provider.Contents.FirstOrDefault().ReadAsByteArrayAsync();
                 if (imageType.Contains("Banner"))
                 {
                     root = HttpContext.Current.Server.MapPath(@"~/upload/Banner");
                 }
 
                 var outputPath = Path.Combine(root, fileName);
+
                 using (var output = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
                 {
                     await output.WriteAsync(fileBytes, 0, fileBytes.Length);
@@ -278,7 +286,7 @@ namespace BonnieYork.Controllers
                         Message = "照片上傳成功",
                     });
                 }
-                else if (imageType=="Banner1"|| imageType == "Banner2" || imageType == "Banner3" || imageType == "Banner4" || imageType == "Banner5")
+                else if (imageType == "Banner1" || imageType == "Banner2" || imageType == "Banner3" || imageType == "Banner4" || imageType == "Banner5")
                 {
                     //要設定超過一個大小就限制大小
                     if (size.Width > 1280 && size.Height > 1280)
@@ -395,7 +403,7 @@ namespace BonnieYork.Controllers
         /// </summary>
         [HttpPost]
         [Route("UploadItemsImage")]
-        public async Task<IHttpActionResult> UploadItemsImage([FromUri]int theItemId)
+        public async Task<IHttpActionResult> UploadItemsImage([FromUri] int theItemId)
         {
             // 檢查請求是否包含 multipart/form-data.
             if (!Request.Content.IsMimeMultipartContent())
@@ -410,7 +418,14 @@ namespace BonnieYork.Controllers
             {
                 // 讀取 MIME 資料
                 var provider = new MultipartMemoryStreamProvider();
-                await Request.Content.ReadAsMultipartAsync(provider);
+                try
+                {
+                    await Request.Content.ReadAsMultipartAsync(provider);
+                }
+                catch
+                {
+                    return BadRequest("檔案超過限制大小");
+                }
 
                 // 取得檔案副檔名，單檔用.FirstOrDefault()直接取出，多檔需用迴圈
                 string fileNameData = provider.Contents.FirstOrDefault().Headers.ContentDisposition.FileName.Trim('\"');
@@ -421,6 +436,10 @@ namespace BonnieYork.Controllers
 
                 // 儲存圖片，單檔用.FirstOrDefault()直接取出，多檔需用迴圈
                 var fileBytes = await provider.Contents.FirstOrDefault().ReadAsByteArrayAsync();
+                if (fileBytes.Length > 5000000)
+                {
+                    return BadRequest("檔案超過限制大小");
+                }
                 var outputPath = Path.Combine(root, fileName);
                 using (var output = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
                 {
@@ -493,12 +512,21 @@ namespace BonnieYork.Controllers
             foreach (StaffDetail item in staffInformaiton)
             {
                 item.JobTitle = view.JobTitle;
+                db.SaveChanges();
             }
+
             StaffWorkItems staffWorkItems = new StaffWorkItems();
-            string[] stringWorkItem = view.BusinessItemsId.ToString().Split(',');
-            foreach (string item in stringWorkItem)
+            //刪除這個員工原本儲存的工作項目資料
+            var deleteStaffId = db.StaffWorkItems.Where(w => w.StaffId == staffId).ToList();
+            foreach (StaffWorkItems deleteItems in deleteStaffId)
             {
-                //把編輯後的員工
+                db.StaffWorkItems.Remove(deleteItems);
+                db.SaveChanges();
+            }
+
+            //新增這個員工更新的工作項目資料
+            foreach (int item in view.BusinessItemsId)
+            {
                 int workItemId = Convert.ToInt32(item);
                 staffWorkItems.BusinessItemsId = workItemId;
                 staffWorkItems.StaffId = staffId;
@@ -507,7 +535,6 @@ namespace BonnieYork.Controllers
                 db.SaveChanges();
             }
 
-            db.SaveChanges();
             return Ok(new { Message = "員工資料編輯完成" });
         }
 
@@ -626,20 +653,81 @@ namespace BonnieYork.Controllers
         }
 
 
+
         /// <summary>
-        /// 所有店家顯示
+        /// 店家行事曆顯示
         /// </summary>
         [HttpGet]
         [JwtAuthFilter]
-        [Route("GetAllStore")]
-        public IHttpActionResult GetAllStore()
+        [Route("Calendar")]
+        public IHttpActionResult Calendar()
         {
             var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
             int identityId = (int)userToken["IdentityId"];
-            var theHoliday = db.StoreDetail.Where(s => s.Id == identityId).Select(s => s.HolidayDate).ToList();
 
+            if (DateTime.Now.Month == 1)
+            {
+                var calendar = db.CustomerReserve.Where(r => r.StoreId == identityId)
+                    .Where(r =>
+                        (r.ReserveDate.Year == (DateTime.Now.Year -1)  & r.ReserveDate.Month == 12 )||
+                        (r.ReserveDate.Year == DateTime.Now.Year & r.ReserveDate.Month == DateTime.Now.Month) ||
+                        (r.ReserveDate.Year == DateTime.Now.Year & r.ReserveDate.Month == (DateTime.Now.Month + 1)))
+                    .OrderBy(r => r.ReserveDate)
+                    .Select(r => new
+                    {
+                        ReserveDate =  r.ReserveDate.Year +"/" + r.ReserveDate.Month + "/" + r.ReserveDate.Day,
+                        ReserveStart = r.ReserveStart.Hour + ":" + r.ReserveStart.Minute,
+                        ReserveEnd =  r.ReserveEnd.Hour + ":" + r.ReserveEnd.Minute,
+                        r.StaffName,
+                        r.CustomerDetail.CustomerName,
+                        r.BusinessItems.ItemName
+                    }).ToList();
 
-            return Ok(new { HolidayDate = theHoliday });
+                return Ok(calendar);
+            }
+            if (DateTime.Now.Month == 12)
+            {
+                var calendar = db.CustomerReserve.Where(r => r.StoreId == identityId)
+                    .Where(r =>
+                    (r.ReserveDate.Year == (DateTime.Now.Year + 1) & r.ReserveDate.Month == 1) ||
+                    (r.ReserveDate.Year == DateTime.Now.Year & r.ReserveDate.Month == DateTime.Now.Month) ||
+                    (r.ReserveDate.Year == DateTime.Now.Year & r.ReserveDate.Month == 11))
+                    .OrderBy(r => r.ReserveDate)
+                    .Select(r => new
+                    {
+                        ReserveDate = r.ReserveDate.Year + "/" + r.ReserveDate.Month + "/" + r.ReserveDate.Day,
+                        ReserveStart = r.ReserveStart.Hour + ":" + r.ReserveStart.Minute,
+                        ReserveEnd = r.ReserveEnd.Hour + ":" + (r.ReserveEnd.Minute <10 ? "0" + r.ReserveEnd.Minute: r.ReserveEnd.Minute.ToString()),
+                        r.StaffName,
+                        r.CustomerDetail.CustomerName,
+                        r.BusinessItems.ItemName,
+                    }).ToList();
+                return Ok(calendar);
+            }
+            else
+            {
+                var calendar = db.CustomerReserve.Where(r => r.StoreId == identityId)
+                    .Where(r =>
+                    (r.ReserveDate.Year == DateTime.Now.Year & r.ReserveDate.Month == (DateTime.Now.Month - 1)) ||
+                    (r.ReserveDate.Year == DateTime.Now.Year & r.ReserveDate.Month == DateTime.Now.Month) ||
+                    (r.ReserveDate.Year == DateTime.Now.Year & r.ReserveDate.Month == (DateTime.Now.Month + 1)))
+                    .OrderBy(r => r.ReserveDate)
+                    .Select(r => new
+                    {
+                        ReserveDate = r.ReserveDate.Year + "/" + r.ReserveDate.Month + "/" + r.ReserveDate.Day,
+                        ReserveStart = r.ReserveStart.Hour + ":" + r.ReserveStart.Minute,
+                        ReserveEnd = r.ReserveEnd.Hour + ":" + r.ReserveEnd.Minute,
+                        r.StaffName,
+                        r.CustomerDetail.CustomerName,
+                        r.BusinessItems.ItemName
+                    }).ToList();
+
+                return Ok(calendar);
+            }
         }
+
+
+
+
     }
 }
