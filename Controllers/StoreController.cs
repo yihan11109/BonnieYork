@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using System.Web.UI.WebControls;
+using System.Web.WebSockets;
 using BonnieYork.JWT;
 using BonnieYork.Models;
 using BonnieYork.Tool;
@@ -485,13 +486,22 @@ namespace BonnieYork.Controllers
         {
             var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
             int identityId = (int)userToken["IdentityId"];
+
+            var staffWorkItems = db.StaffWorkItems.AsQueryable();   //對資料庫下指令
+
             var AllStaffItem = db.StaffDetail.Where(e => e.StoreId == identityId).Select(e => new
             {
                 e.Id,
+                StaffWorkItems = staffWorkItems.Where(s => s.StaffId == e.Id).Select(b => new
+                {
+                    b.BusinessItemsId,
+                    b.BusinessItems.ItemName
+                }),
                 e.StaffName,
                 e.JobTitle,
-                HeadShot = e.HeadShot == null ? e.HeadShot : "https://" + Request.RequestUri.Host + "/upload/ItemsImage/" + e.HeadShot,
+                HeadShot = e.HeadShot == null ? e.HeadShot : "https://" + Request.RequestUri.Host + "/upload/headshot/" + e.HeadShot,
             }).ToList();
+
 
             return Ok(new { AllStaffItem });
         }
@@ -669,15 +679,16 @@ namespace BonnieYork.Controllers
             {
                 var calendar = db.CustomerReserve.Where(r => r.StoreId == identityId)
                     .Where(r =>
-                        (r.ReserveDate.Year == (DateTime.Now.Year -1)  & r.ReserveDate.Month == 12 )||
+                        (r.ReserveDate.Year == (DateTime.Now.Year - 1) & r.ReserveDate.Month == 12) ||
                         (r.ReserveDate.Year == DateTime.Now.Year & r.ReserveDate.Month == DateTime.Now.Month) ||
                         (r.ReserveDate.Year == DateTime.Now.Year & r.ReserveDate.Month == (DateTime.Now.Month + 1)))
                     .OrderBy(r => r.ReserveDate)
                     .Select(r => new
                     {
-                        ReserveDate =  r.ReserveDate.Year +"/" + r.ReserveDate.Month + "/" + r.ReserveDate.Day,
-                        ReserveStart = r.ReserveStart.Hour + ":" + r.ReserveStart.Minute,
-                        ReserveEnd =  r.ReserveEnd.Hour + ":" + r.ReserveEnd.Minute,
+                        ReserveId = r.Id,
+                        ReserveDate = r.ReserveDate.Year + "/" + r.ReserveDate.Month + "/" + r.ReserveDate.Day,
+                        ReserveStart = r.ReserveStart.Hour + ":" + (r.ReserveEnd.Minute < 10 ? "0" + r.ReserveEnd.Minute : r.ReserveEnd.Minute.ToString()),
+                        ReserveEnd = r.ReserveEnd.Hour + ":" + (r.ReserveEnd.Minute < 10 ? "0" + r.ReserveEnd.Minute : r.ReserveEnd.Minute.ToString()),
                         r.StaffName,
                         r.CustomerDetail.CustomerName,
                         r.BusinessItems.ItemName
@@ -695,9 +706,10 @@ namespace BonnieYork.Controllers
                     .OrderBy(r => r.ReserveDate)
                     .Select(r => new
                     {
+                        ReserveId = r.Id,
                         ReserveDate = r.ReserveDate.Year + "/" + r.ReserveDate.Month + "/" + r.ReserveDate.Day,
-                        ReserveStart = r.ReserveStart.Hour + ":" + r.ReserveStart.Minute,
-                        ReserveEnd = r.ReserveEnd.Hour + ":" + (r.ReserveEnd.Minute <10 ? "0" + r.ReserveEnd.Minute: r.ReserveEnd.Minute.ToString()),
+                        ReserveStart = r.ReserveStart.Hour + ":" + (r.ReserveEnd.Minute < 10 ? "0" + r.ReserveEnd.Minute : r.ReserveEnd.Minute.ToString()),
+                        ReserveEnd = r.ReserveEnd.Hour + ":" + (r.ReserveEnd.Minute < 10 ? "0" + r.ReserveEnd.Minute : r.ReserveEnd.Minute.ToString()),
                         r.StaffName,
                         r.CustomerDetail.CustomerName,
                         r.BusinessItems.ItemName,
@@ -714,9 +726,10 @@ namespace BonnieYork.Controllers
                     .OrderBy(r => r.ReserveDate)
                     .Select(r => new
                     {
+                        ReserveId = r.Id,
                         ReserveDate = r.ReserveDate.Year + "/" + r.ReserveDate.Month + "/" + r.ReserveDate.Day,
-                        ReserveStart = r.ReserveStart.Hour + ":" + r.ReserveStart.Minute,
-                        ReserveEnd = r.ReserveEnd.Hour + ":" + r.ReserveEnd.Minute,
+                        ReserveStart = r.ReserveStart.Hour + ":" + (r.ReserveEnd.Minute < 10 ? "0" + r.ReserveEnd.Minute : r.ReserveEnd.Minute.ToString()),
+                        ReserveEnd = r.ReserveEnd.Hour + ":" + (r.ReserveEnd.Minute < 10 ? "0" + r.ReserveEnd.Minute : r.ReserveEnd.Minute.ToString()),
                         r.StaffName,
                         r.CustomerDetail.CustomerName,
                         r.BusinessItems.ItemName
@@ -729,5 +742,148 @@ namespace BonnieYork.Controllers
 
 
 
+        /// <summary>
+        /// 店家預約項目顯示
+        /// </summary>
+        [HttpGet]
+        [JwtAuthFilter]
+        [Route("GetReserve")]
+        public IHttpActionResult GetReserve([FromUri] int reserveId)
+        {
+            var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+            int identityId = (int)userToken["IdentityId"];
+            var theReserver = db.CustomerReserve.Where(r => r.Id == reserveId).Select(r => new
+            {
+                ReserveId = r.Id,
+                r.StaffName,
+                CustomerName = r.CustomerDetail == null ? r.ManualName : r.CustomerDetail.CustomerName,
+                r.BusinessItems.ItemName,
+                r.BusinessItems.Price,
+                CellphoneNumber = r.CustomerDetail == null ? r.ManualCellphoneNumber : r.CustomerDetail.CellphoneNumber,
+                Email = r.CustomerDetail == null ? r.ManualEmail : r.CustomerDetail.Account,
+                ReserveDate = r.ReserveDate.Year + "/" + r.ReserveDate.Month + "/" + r.ReserveDate.Day,
+                ReserveStart = r.ReserveStart.Hour + ":" + (r.ReserveEnd.Minute < 10 ? "0" + r.ReserveEnd.Minute : r.ReserveEnd.Minute.ToString()),
+
+            }).ToList();
+
+            if (theReserver.Count > 0)
+            {
+                return Ok(theReserver);
+            }
+            else
+            {
+                return BadRequest("無此預約id");
+            }
+
+        }
+
+
+
+        /// <summary>
+        /// 店家刪除預約項目
+        /// </summary>
+        [HttpDelete]
+        [JwtAuthFilter]
+        [Route("DeleteReserve")]
+        public IHttpActionResult DeleteReserve([FromUri] int reserveId)
+        {
+            var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+            int identityId = (int)userToken["IdentityId"];
+            var theReserver = db.CustomerReserve.Where(r => r.Id == reserveId).ToList();
+
+            if (theReserver.Count > 0)
+            {
+                db.CustomerReserve.Remove(theReserver[0]);
+                db.SaveChanges();
+                return Ok(new { Message = "刪除成功" });
+            }
+            else
+            {
+                return BadRequest("無此預約id");
+            }
+
+        }
+
+
+
+        /// <summary>
+        /// 所有店家顯示
+        /// </summary>
+        [HttpGet]
+        [Route("GetAllStore")]
+        public IHttpActionResult GetAllStore()
+        {
+            var businessItem = db.BusinessItems.AsQueryable();   //對資料庫下指令
+            var staffInformation = db.StaffDetail.AsQueryable();
+            var staffWorkItem = db.StaffWorkItems.AsQueryable();
+
+            var allStore = db.StoreDetail.Select(s => new
+            {
+                StoredId = s.Id,
+                s.BannerPath,
+                s.BusinessInformation.HolidayStartTime,
+                s.BusinessInformation.HolidayEndTime,
+                s.BusinessInformation.WeekdayStartTime,
+                s.BusinessInformation.WeekdayEndTime,
+                Address = s.City + s.District + s.Address,
+                s.LineLink,
+                s.FacebookLink,
+                s.InstagramLink,
+                BusinessItem = businessItem.Where(b => b.StoreId == s.Id).Select(b => new
+                {
+                    b.Id,
+                    b.ItemName,
+                    b.SpendTime,
+                    b.Price,
+                    b.Describe,
+                    PicturePath = b.PicturePath == null ? null : "https://" + Request.RequestUri.Host + "/upload/headshot/" + b.PicturePath,
+                }),
+                AllStaffInformation = staffInformation.Where(e => e.StoreId == s.Id).Select(e => new
+                {
+                    e.Id,
+                    e.StaffName,
+                    e.JobTitle,
+                    StaffWorkItems = staffWorkItem.Where(w => w.StaffId == e.Id).Select(w => new
+                    {
+                        w.BusinessItemsId,
+                        w.BusinessItems.ItemName
+                    }),
+                    HeadShot = e.HeadShot == null ? null : "https://" + Request.RequestUri.Host + "/upload/headshot/" + e.HeadShot,
+                })
+            }).AsEnumerable().Select(c => new
+            {
+                c.StoredId,
+                BannerPath = BannerObject(c.BannerPath),
+                c.HolidayStartTime,
+                c.HolidayEndTime,
+                c.WeekdayStartTime,
+                c.WeekdayEndTime,
+                c.Address,
+                c.LineLink,
+                c.FacebookLink,
+                c.InstagramLink,
+                c.BusinessItem,
+                c.AllStaffInformation,
+
+            }).ToList();
+            JObject bannerJObject = new JObject(); //宣告空物件
+            return Ok(allStore);
+        }
+        object BannerObject(string bannerPath)
+        {
+            if (bannerPath == null)
+            {
+                return null;
+            }
+            else
+            {
+                JObject bannerObject = JObject.Parse(bannerPath); //把bannerPath(string) 轉成物件
+                foreach (var item in bannerObject)
+                {
+                    bannerObject[item.Key] = "https://" + Request.RequestUri.Host + "/upload/Banner/" + item.Value;
+                }
+                return bannerObject;
+            }
+        }
     }
 }

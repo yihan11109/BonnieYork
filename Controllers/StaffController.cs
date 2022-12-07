@@ -38,12 +38,13 @@ namespace BonnieYork.Controllers
             {
                 e.Account,
                 e.StoreDetail.StoreName,
+                e.StaffName,
                 e.CellphoneNumber,
                 e.Introduction,
                 e.FacebookLink,
                 e.InstagramLink,
                 e.LineLink,
-                HeadShot = e.HeadShot==null? null:"https://" + Request.RequestUri.Host + "/upload/headshot/" + e.HeadShot,
+                HeadShot = e.HeadShot == null ? null : "https://" + Request.RequestUri.Host + "/upload/headshot/" + e.HeadShot,
             }).ToList();
             return Ok(new { Identity = "staff", StaffInformation = staffInformation });
         }
@@ -139,13 +140,13 @@ namespace BonnieYork.Controllers
                 if (size.Width > 1280 && size.Height > 1280)
                 {
                     image.Mutate(x => x.Resize(0, 640)); // 輸入(120, 0)會保持比例出現黑邊
-
                 }
                 image.Save(outputPath);
+
                 var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
                 int identityId = (int)userToken["IdentityId"];
-                var customerHeadShot = db.CustomerDetail.Where(c => c.Id == identityId).ToList();
-                customerHeadShot[0].HeadShot = fileName;
+                var staffHeadShot = db.StaffDetail.Where(c => c.Id == identityId).ToList();
+                staffHeadShot[0].HeadShot = fileName;
                 image.Save(outputPath);
                 db.SaveChanges();
 

@@ -163,3 +163,7 @@ C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.editCustomerReserve31.resources
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.editCustomerReserve4.resources
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.editCustomerReserve5.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.editCustomerReserve6.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.editCustomerReserve7.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.addReserveStateInCustomerReserve.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Release\BonnieYork.Migrations.addColumnToCustomerReserve.resources

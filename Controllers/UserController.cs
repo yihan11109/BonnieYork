@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
@@ -253,6 +254,7 @@ namespace BonnieYork.Controllers
                     staffDetail.JobTitle = userToken["JobTitle"].ToString();
                     db.StaffDetail.Add(staffDetail);
                     db.SaveChanges();
+
                     var staffInformation = db.StaffDetail.Where(e => e.Account == view.Account.ToLower()).Select(e => new
                         {
                             e.Id,
@@ -263,7 +265,7 @@ namespace BonnieYork.Controllers
                         .ToList();
 
                     StaffWorkItems staffWorkItems = new StaffWorkItems();
-                    foreach (int item in (int[])userToken["BusinessItemId"])
+                    foreach (var item in (IEnumerable)userToken["BusinessItemId"])
                     {
                         int workItemId = Convert.ToInt32(item);
                         staffWorkItems.BusinessItemsId = workItemId;
@@ -272,8 +274,6 @@ namespace BonnieYork.Controllers
                         db.StaffWorkItems.Add(staffWorkItems);
                         db.SaveChanges();
                     }
-                    
-                    //staffDetail.StaffWorkItems = userToken["BusinessItemId"].ToString();
 
                     string token = JwtAuthUtil.GenerateToken(staffInformation[0].Id, staffInformation[0].StoreId, view.Account.ToLower(), staffInformation[0].StoreName, staffInformation[0].StaffName, "", "staff");
                     result = new
@@ -283,7 +283,6 @@ namespace BonnieYork.Controllers
                     };
                 }
             }
-
             return Ok(result);
         }
 

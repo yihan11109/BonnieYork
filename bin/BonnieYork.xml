@@ -581,6 +581,21 @@
             店家行事曆顯示
             </summary>
         </member>
+        <member name="M:BonnieYork.Controllers.StoreController.GetReserve(System.Int32)">
+            <summary>
+            店家預約項目顯示
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.StoreController.DeleteReserve(System.Int32)">
+            <summary>
+            店家刪除預約項目
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.StoreController.GetAllStore">
+            <summary>
+            所有店家顯示
+            </summary>
+        </member>
         <member name="M:BonnieYork.Controllers.UserController.SignUpIsValid(BonnieYork.Models.ViewModel)">
             <summary>
             (註冊)判斷Email是否註冊過
@@ -615,6 +630,14 @@
             <summary>
             每頁驗證
             </summary>
+        </member>
+        <member name="T:BonnieYork.Models.ViewModel">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:BonnieYork.Models.InformationDataView.BirthDay">
+            Customer
         </member>
         <member name="T:BonnieYork.Tool.JwtAuthFilter">
             <summary>

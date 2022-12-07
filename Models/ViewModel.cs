@@ -6,6 +6,9 @@ using System.Web;
 
 namespace BonnieYork.Models
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class ViewModel
     {
 
@@ -211,7 +214,7 @@ namespace BonnieYork.Models
         public string CustomerName { get; set; }
 
 
-        //Customer
+        ///Customer
         [Display(Name = "生日")]
         [MaxLength(50)]
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "yyyy-MM-dd")]

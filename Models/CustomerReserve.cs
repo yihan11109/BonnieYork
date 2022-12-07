@@ -65,5 +65,27 @@ namespace BonnieYork.Models
         [DisplayName("預約結束時間")]
         public DateTime ReserveEnd { get; set; }
 
+
+
+        [DisplayName("預約狀態")]
+        public string ReserveState { get; set; }
+
+
+
+        [DisplayName("手填顧客姓名")]
+        public string ManualName { get; set; }
+
+
+
+        [DisplayName("手填顧客手機")]
+        public string ManualCellphoneNumber { get; set; }
+
+
+        [EmailAddress(ErrorMessage = "Email格式不符")]
+        [MaxLength(100)]
+        [DataType(DataType.EmailAddress)]
+        [DisplayName("手填顧客Email")]
+        public string ManualEmail { get; set; }
+
     }
 }
