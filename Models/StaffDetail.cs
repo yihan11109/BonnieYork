@@ -79,6 +79,8 @@ namespace BonnieYork.Models
 
 
 
-        public virtual ICollection<StaffHoliday> StaffHoliday { get; set; }
+        [Display(Name = "員工休假日")]
+        public string StaffDaysOff { get; set; }
+
     }
 }

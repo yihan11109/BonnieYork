@@ -160,5 +160,53 @@ namespace BonnieYork.Controllers
                 return BadRequest("照片上傳失敗或未上傳"); // 400
             }
         }
+
+
+
+        /// <summary>
+        /// 員工休假日顯示
+        /// </summary>
+        [HttpGet]
+        [JwtAuthFilter]
+        [Route("GetStaffDaysOff")]
+        public IHttpActionResult GetHolidayDate()
+        {
+            var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+            int identityId = (int)userToken["IdentityId"];
+            var theHoliday = db.StaffDetail.Where(e => e.Id == identityId).Select(e => e.StaffDaysOff).ToList();
+
+
+            return Ok(new { StaffDaysOff = theHoliday });
+        }
+
+
+
+        /// <summary>
+        /// 員工修改休假日
+        /// </summary>
+        [HttpPost]
+        [JwtAuthFilter]
+        [Route("EditStaffDaysOff")]
+        public IHttpActionResult EditHolidayDate(InformationDataView view)
+        {
+            var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+            int identityId = (int)userToken["IdentityId"];
+            var theHoliday = db.StaffDetail.Where(s => s.Id == identityId).ToList();
+            StaffDetail staffDaysOff = new StaffDetail();
+
+            if (theHoliday.Count != 0)
+            {
+                theHoliday[0].StaffDaysOff = view.StaffDaysOff;
+            }
+            else
+            {
+                staffDaysOff.StaffDaysOff = view.StaffDaysOff;
+                db.StaffDetail.Add(staffDaysOff);
+            }
+            db.SaveChanges();
+
+            db.SaveChanges();
+            return Ok(new { Message = "休假日修改成功" });
+        }
     }
 }

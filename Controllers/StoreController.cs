@@ -492,6 +492,7 @@ namespace BonnieYork.Controllers
             var AllStaffItem = db.StaffDetail.Where(e => e.StoreId == identityId).Select(e => new
             {
                 e.Id,
+                e.Account,
                 StaffWorkItems = staffWorkItems.Where(s => s.StaffId == e.Id).Select(b => new
                 {
                     b.BusinessItemsId,
@@ -514,32 +515,36 @@ namespace BonnieYork.Controllers
         [HttpPost]
         [JwtAuthFilter]
         [Route("EditStaff")]
-        public IHttpActionResult EditStaff([FromUri] int staffId, [FromBody] InformationDataView view)
+        public IHttpActionResult EditStaff(InformationDataView view)
         {
             var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
             int identityId = (int)userToken["IdentityId"];
-            var staffInformaiton = db.StaffDetail.Where(e => e.StoreId == identityId).Where(e => e.Id == staffId).ToList();
-            foreach (StaffDetail item in staffInformaiton)
-            {
-                item.JobTitle = view.JobTitle;
-                db.SaveChanges();
-            }
+            var staffInformaiton = db.StaffDetail.Where(e => e.StoreId == identityId).Where(e => e.Id == view.StaffId).ToList();
+
+            staffInformaiton[0].JobTitle = view.JobTitle;
+
 
             StaffWorkItems staffWorkItems = new StaffWorkItems();
             //刪除這個員工原本儲存的工作項目資料
-            var deleteStaffId = db.StaffWorkItems.Where(w => w.StaffId == staffId).ToList();
-            foreach (StaffWorkItems deleteItems in deleteStaffId)
+            var deleteStaffId = db.StaffWorkItems.Where(w => w.StaffId == view.StaffId).ToList();
+
+            if (deleteStaffId != null)
             {
-                db.StaffWorkItems.Remove(deleteItems);
-                db.SaveChanges();
+                foreach (StaffWorkItems deleteItems in deleteStaffId)
+                {
+                    db.StaffWorkItems.Remove(deleteItems);
+                    db.SaveChanges();
+                }
             }
 
+            string[] businessItemsIdst = view.BusinessItemsId.Split(',');
             //新增這個員工更新的工作項目資料
-            foreach (int item in view.BusinessItemsId)
+            foreach (string item in businessItemsIdst)
             {
-                int workItemId = Convert.ToInt32(item);
-                staffWorkItems.BusinessItemsId = workItemId;
-                staffWorkItems.StaffId = staffId;
+
+                int businessItemsId = Convert.ToInt32(item);
+                staffWorkItems.BusinessItemsId = businessItemsId;
+                staffWorkItems.StaffId = view.StaffId;
                 staffWorkItems.StaffName = staffInformaiton[0].StaffName;
                 db.StaffWorkItems.Add(staffWorkItems);
                 db.SaveChanges();
@@ -652,12 +657,19 @@ namespace BonnieYork.Controllers
             var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
             int identityId = (int)userToken["IdentityId"];
             var theHoliday = db.StoreDetail.Where(s => s.Id == identityId).ToList();
+            StoreDetail storeHoliday = new StoreDetail();
 
-            foreach (StoreDetail item in theHoliday)
+            if (theHoliday.Count != 0)
             {
-                item.HolidayDate = view.HolidayDate;
-            }
 
+                theHoliday[0].HolidayDate = view.HolidayDate;
+
+            }
+            else
+            {
+                storeHoliday.HolidayDate = view.HolidayDate;
+                db.StoreDetail.Add(storeHoliday);
+            }
             db.SaveChanges();
             return Ok(new { Message = "公休日修改成功" });
         }
@@ -843,6 +855,9 @@ namespace BonnieYork.Controllers
                     e.Id,
                     e.StaffName,
                     e.JobTitle,
+                    e.FacebookLink,
+                    e.InstagramLink,
+                    e.LineLink,
                     StaffWorkItems = staffWorkItem.Where(w => w.StaffId == e.Id).Select(w => new
                     {
                         w.BusinessItemsId,
@@ -850,20 +865,20 @@ namespace BonnieYork.Controllers
                     }),
                     HeadShot = e.HeadShot == null ? null : "https://" + Request.RequestUri.Host + "/upload/headshot/" + e.HeadShot,
                 })
-            }).AsEnumerable().Select(c => new
+            }).AsEnumerable().Select(a => new
             {
-                c.StoredId,
-                BannerPath = BannerObject(c.BannerPath),
-                c.HolidayStartTime,
-                c.HolidayEndTime,
-                c.WeekdayStartTime,
-                c.WeekdayEndTime,
-                c.Address,
-                c.LineLink,
-                c.FacebookLink,
-                c.InstagramLink,
-                c.BusinessItem,
-                c.AllStaffInformation,
+                a.StoredId,
+                BannerPath = BannerObject(a.BannerPath),
+                a.HolidayStartTime,
+                a.HolidayEndTime,
+                a.WeekdayStartTime,
+                a.WeekdayEndTime,
+                a.Address,
+                a.LineLink,
+                a.FacebookLink,
+                a.InstagramLink,
+                a.BusinessItem,
+                a.AllStaffInformation,
 
             }).ToList();
             JObject bannerJObject = new JObject(); //宣告空物件

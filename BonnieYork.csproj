@@ -340,6 +340,10 @@
     <Compile Include="Migrations\202212070609021_addColumnToCustomerReserve.Designer.cs">
       <DependentUpon>202212070609021_addColumnToCustomerReserve.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202212080336113_deleteStaffHolidayAddToStaffDetail.cs" />
+    <Compile Include="Migrations\202212080336113_deleteStaffHolidayAddToStaffDetail.Designer.cs">
+      <DependentUpon>202212080336113_deleteStaffHolidayAddToStaffDetail.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\createAllTable.cs" />
     <Compile Include="Migrations\createAllTable.Designer.cs">
       <DependentUpon>createAllTable.cs</DependentUpon>
@@ -355,7 +359,6 @@
     <Compile Include="Models\CustomerDetail.cs" />
     <Compile Include="Models\Industry.cs" />
     <Compile Include="Models\StaffDetail.cs" />
-    <Compile Include="Models\StaffHoliday.cs" />
     <Compile Include="Models\StoreDetail.cs" />
     <Compile Include="Models\ViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -523,6 +526,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202212070609021_addColumnToCustomerReserve.resx">
       <DependentUpon>202212070609021_addColumnToCustomerReserve.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202212080336113_deleteStaffHolidayAddToStaffDetail.resx">
+      <DependentUpon>202212080336113_deleteStaffHolidayAddToStaffDetail.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\createAllTable.resx">
       <DependentUpon>createAllTable.cs</DependentUpon>

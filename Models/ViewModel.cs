@@ -146,11 +146,11 @@ namespace BonnieYork.Models
 
 
         //Staff
-        [Display(Name = "店鋪ID")]  //ForeignKey類別名稱
+        [Display(Name = "店鋪ID")]  
         public int StoreId { get; set; }
 
 
-
+        
         //Staff
         [Required(ErrorMessage = "{0}必填")]
         [MaxLength(20)]     //不設長度預設為nvarchar(max)
@@ -261,6 +261,12 @@ namespace BonnieYork.Models
         [MaxLength(15)]
         [Display(Name = "市話")]
         public string PhoneNumber { get; set; }
+
+
+
+        [Display(Name = "員工ID")]  //ForeignKey類別名稱
+        public int StaffId { get; set; }
+
 
 
         //Store
@@ -384,11 +390,16 @@ namespace BonnieYork.Models
 
         [Display(Name = "員工工作項目ID")]
         public string BusinessItemsId { get; set; }
+
+
+        [Display(Name = "員工休假日")]
+        public string StaffDaysOff { get; set; }
     }
 
 
-    public class AllItems
+    public class AllItems:InformationDataView
     {
+
         [Required(ErrorMessage = "{0}必填")]
         [Display(Name = "項目名稱")]
         [MaxLength(10)]

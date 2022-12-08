@@ -496,6 +496,16 @@
             顧客大頭照存取
             </summary>
         </member>
+        <member name="M:BonnieYork.Controllers.CustomerController.Reserve(System.Int32,System.Int32)">
+            <summary>
+            預約項目顯示
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.CustomerController.SelectReserveTime(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            預約日期及時間
+            </summary>
+        </member>
         <member name="M:BonnieYork.Controllers.StaffController.GetInformation">
             <summary>
             員工資訊顯示
@@ -509,6 +519,16 @@
         <member name="M:BonnieYork.Controllers.StaffController.UploadProfile">
             <summary>
             員工大頭照存取
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.StaffController.GetHolidayDate">
+            <summary>
+            員工休假日顯示
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.StaffController.EditHolidayDate(BonnieYork.Models.InformationDataView)">
+            <summary>
+            員工修改休假日
             </summary>
         </member>
         <member name="M:BonnieYork.Controllers.StoreController.GetInformation">
@@ -546,7 +566,7 @@
             店家所有員工資訊
             </summary>
         </member>
-        <member name="M:BonnieYork.Controllers.StoreController.EditStaff(System.Int32,BonnieYork.Models.InformationDataView)">
+        <member name="M:BonnieYork.Controllers.StoreController.EditStaff(BonnieYork.Models.InformationDataView)">
             <summary>
             店家編輯員工
             </summary>
