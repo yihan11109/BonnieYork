@@ -11,6 +11,7 @@ using System.Web.Http;
 using BonnieYork.JWT;
 using BonnieYork.Models;
 using BonnieYork.Tool;
+using Newtonsoft.Json.Linq;
 using NSwag.Annotations;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -193,15 +194,19 @@ namespace BonnieYork.Controllers
             int identityId = (int)userToken["IdentityId"];
             DateTime now = DateTime.Now;
             DateTime afterMonth = DateTime.Now.AddMonths(+1);
+
+            //找出店家公休日
             var storeHolidayDate = db.StoreDetail.Where(s => s.Id == storeId).Select(s => new
             {
                 s.HolidayDate,
                 s.BusinessInformation.PublicHoliday,
             }).ToList();
+
+            //店家設定的不定期公休日
             string[] storeHolidayDateArr = storeHolidayDate[0].HolidayDate.Split(',');
             string weekDay = "";
-
-            StringBuilder theStoreWorkDate = new StringBuilder();
+            //店家設定的每個禮拜的公休日
+            List<string> theStoreWorkDate = new List<string>();
             do
             {
                 switch (now.DayOfWeek)
@@ -232,13 +237,41 @@ namespace BonnieYork.Controllers
                 }
                 if (!storeHolidayDateArr.Contains(now.ToShortDateString()) && weekDay != storeHolidayDate[0].PublicHoliday)
                 {
-                    theStoreWorkDate.Append(now.ToShortDateString());  // 找出所有扣除公休日後的可預約日期
-                    theStoreWorkDate.Append(',');
+                    theStoreWorkDate.Add(now.ToShortDateString());
                 }
                 now = now.AddDays(+1);
-
             } while (now != afterMonth);
-            return Ok(theStoreWorkDate.ToString().TrimEnd(','));
+
+            //從店家有營業的日期裡刪掉這個員工的休假日 = 這個員工可預約的日期
+            var theStaffDaysOff = db.StaffDetail.Where(e => e.Id == staffId).Select(e => e.StaffDaysOff).ToList();
+            List<string> theStaffWorkDate = new List<string>();
+            //迴圈找店家工作日中有沒有員工休假日，如果沒有把店家工作日存入字串 = 員工工作日
+            for (int i = 0; i < theStoreWorkDate.Count; i++)
+            {
+                //判斷店家工作日中有沒有員工休假日
+                if (!theStaffDaysOff[0].Contains(theStoreWorkDate[i]))
+                {
+                    theStaffWorkDate.Add(theStoreWorkDate[i]);
+                }
+            }
+            
+            DateTime nextMonth = DateTime.Now.AddMonths(1);
+            //在顧客預約表撈出現在日期往後推一個月範圍的預約
+            var theStaffReserveDetail = db.CustomerReserve.Where(c => c.StaffId == staffId)
+                .Where(c => c.ReserveState == "undone").Where(c => c.ItemId == itemId).Where(c =>
+                    c.ReserveDate > DateTime.Now && c.ReserveDate <= nextMonth).ToList();
+
+            JObject theStaffWorkDateJObject = new JObject();
+            for (int i = 0; i < theStaffWorkDate.Count; i++)
+            {
+                //if (!theStaffWorkDate[i].Contains(theStaffReserveDetail[0].ReserveDate.ToShortDateString()))
+                //{
+                //    theStaffWorkDateJObject["TheDate"] = theStaffReserveDetail[0].ReserveDate.ToShortDateString();
+                //    theStaffWorkDateJObject["TheReserveTime"] = 
+                //}
+            }
+            
+            return Ok(theStaffReserveDetail);
         }
 
     }

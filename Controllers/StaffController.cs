@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
@@ -175,8 +176,31 @@ namespace BonnieYork.Controllers
             int identityId = (int)userToken["IdentityId"];
             var theHoliday = db.StaffDetail.Where(e => e.Id == identityId).Select(e => e.StaffDaysOff).ToList();
 
+            //把所有公休日轉成string陣列
+            string[] stringHolidayArr = theHoliday[0].Split(',');
+            StringBuilder showStaffDaysOff = new StringBuilder();
+            StringBuilder pastStaffDaysOff = new StringBuilder();
+            DateTime[] dateHolidayArr = new DateTime[stringHolidayArr.Length];
 
-            return Ok(new { StaffDaysOff = theHoliday });
+            for (int i = 0; i < stringHolidayArr.Length; i++)
+            {
+                //把string陣列的公休日轉成DateTime陣列
+                dateHolidayArr[i] = DateTime.Parse(stringHolidayArr[i]);
+                //字串存入這個月跟下個月的公休日
+                if (dateHolidayArr[i].Month == DateTime.Now.Month || dateHolidayArr[i].Month == DateTime.Now.AddMonths(1).Month)
+                {
+                    showStaffDaysOff.Append(dateHolidayArr[i].ToShortDateString());
+                    showStaffDaysOff.Append(',');
+                }
+                //字串存入這個月之前及下個月之後的日期
+                else if (dateHolidayArr[i].Month != DateTime.Now.Month || dateHolidayArr[i].Month > DateTime.Now.AddMonths(1).Month)
+                {
+                    pastStaffDaysOff.Append(dateHolidayArr[i].ToShortDateString());
+                    pastStaffDaysOff.Append(',');
+                }
+            }
+            return Ok(new { PastStaffDaysOff = pastStaffDaysOff.ToString().TrimEnd(','), ShowStaffDaysOff = showStaffDaysOff.ToString().TrimEnd(',') });
+
         }
 
 
