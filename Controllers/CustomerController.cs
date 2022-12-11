@@ -256,22 +256,63 @@ namespace BonnieYork.Controllers
             }
             
             DateTime nextMonth = DateTime.Now.AddMonths(1);
-            //在顧客預約表撈出現在日期往後推一個月範圍的預約
-            var theStaffReserveDetail = db.CustomerReserve.Where(c => c.StaffId == staffId)
-                .Where(c => c.ReserveState == "undone").Where(c => c.ItemId == itemId).Where(c =>
-                    c.ReserveDate > DateTime.Now && c.ReserveDate <= nextMonth).ToList();
-
-            JObject theStaffWorkDateJObject = new JObject();
-            for (int i = 0; i < theStaffWorkDate.Count; i++)
+            //在顧客預約表撈現在日期往後推一個月範圍的預約
+            var theStaffReserveDetail = db.CustomerReserve.Where(c => c.StaffId == staffId).Where(c => c.ReserveState == "undone").Where(c => c.ItemId == itemId).Where(c =>c.ReserveDate >= DateTime.Now && c.ReserveDate <= nextMonth).Select(c => new
             {
-                //if (!theStaffWorkDate[i].Contains(theStaffReserveDetail[0].ReserveDate.ToShortDateString()))
-                //{
-                //    theStaffWorkDateJObject["TheDate"] = theStaffReserveDetail[0].ReserveDate.ToShortDateString();
-                //    theStaffWorkDateJObject["TheReserveTime"] = 
-                //}
+                TheReserveDate = c.ReserveDate.ToString("yyyy/MM/dd"),
+                c.ReserveStart,
+                c.ReserveEnd
+            }).ToList();
+
+            //撈出店家營業時間
+            var theStoreBusinessInformation = db.StoreDetail.Where(s => s.Id == storeId).Select(s => new
+            {
+                s.BusinessInformation.HolidayStartTime,
+                s.BusinessInformation.HolidayEndTime,
+                s.BusinessInformation.HolidayBreakStart,
+                s.BusinessInformation.HolidayBreakEnd,
+                s.BusinessInformation.WeekdayStartTime,
+                s.BusinessInformation.WeekdayEndTime,
+                s.BusinessInformation.WeekdayBreakStart,
+                s.BusinessInformation.WeekdayBreakEnd,
+                s.BusinessInformation.TimeInterval
+            }).ToList();
+            int holidayStartTimeToInt = Int32.Parse(theStoreBusinessInformation[0].HolidayStartTime.Replace(":",""));
+            int holidayEndTimeToInt = Int32.Parse(theStoreBusinessInformation[0].HolidayEndTime.Replace(":", ""));
+            int holidayBreakStartToInt = Int32.Parse(theStoreBusinessInformation[0].HolidayBreakStart.Replace(":", ""));
+            int holidayBreakEndToInt = Int32.Parse(theStoreBusinessInformation[0].HolidayBreakEnd.Replace(":", ""));
+            int weekdayStartTimeToInt = Int32.Parse(theStoreBusinessInformation[0].WeekdayStartTime.Replace(":", ""));
+            int weekdayEndTimeToInt = Int32.Parse(theStoreBusinessInformation[0].WeekdayEndTime.Replace(":", ""));
+            int weekdayBreakStartToInt = Int32.Parse(theStoreBusinessInformation[0].WeekdayBreakStart.Replace(":", ""));
+            int weekdayBreakEndToInt = Int32.Parse(theStoreBusinessInformation[0].WeekdayBreakEnd.Replace(":", ""));
+            int TimeIntervalToInt = Int32.Parse(theStoreBusinessInformation[0].TimeInterval.Replace(":", ""));
+
+            //撈出項目花費時間
+            var theItemSpendTime = db.BusinessItems.Where(i => i.Id == itemId).Select(i => i.SpendTime).ToList();
+            int theItemSpendTimeToInt  = Int32.Parse(theItemSpendTime[0]); 
+
+            //店家平日營業時間
+            JObject theStaffWorkDateJObject = new JObject();
+            if (DateTime.Now.DayOfWeek.ToString() != "Saturday" && DateTime.Now.DayOfWeek.ToString() != "Sunday")
+            {
+                for (int i = 0; i < theStaffWorkDate.Count; i++)
+                {
+                    if (!theStaffWorkDate[i].Contains(theStaffReserveDetail[0].TheReserveDate))
+                    {
+                        while ((holidayStartTimeToInt + TimeIntervalToInt + theItemSpendTimeToInt) < holidayEndTimeToInt)
+                        {
+
+                        }
+
+                        theStaffWorkDateJObject[theStaffReserveDetail[0].TheReserveDate] =
+                            theStoreBusinessInformation[0].HolidayStartTime;
+                    }
+                }
+
             }
-            
             return Ok(theStaffReserveDetail);
+
+
         }
 
     }

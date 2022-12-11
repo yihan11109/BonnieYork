@@ -640,30 +640,51 @@ namespace BonnieYork.Controllers
             var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
             int identityId = (int)userToken["IdentityId"];
             var theHoliday = db.StoreDetail.Where(s => s.Id == identityId).Select(s => s.HolidayDate).ToList();
-            //把所有公休日轉成string陣列
-            string[] stringHolidayArr = theHoliday[0].Split(',');
-            StringBuilder showHolidayDate = new StringBuilder();
-            StringBuilder pastHolidayDate = new StringBuilder();
-            DateTime[] dateHolidayArr = new DateTime[stringHolidayArr.Length];
-           
-            for (int i = 0; i < stringHolidayArr.Length; i++)
+
+            if (theHoliday[0] != null)
             {
-                //把string陣列的公休日轉成DateTime陣列
-                dateHolidayArr[i] = DateTime.Parse(stringHolidayArr[i]);
-                //字串存入這個月跟下個月的公休日
-                if (dateHolidayArr[i].Month == DateTime.Now.Month || dateHolidayArr[i].Month == DateTime.Now.AddMonths(1).Month)
+                //把所有公休日轉成string陣列
+                string[] stringHolidayArr = theHoliday[0].Split(',');
+                StringBuilder showHolidayDate = new StringBuilder();
+                StringBuilder pastHolidayDate = new StringBuilder();
+                DateTime[] dateHolidayArr = new DateTime[stringHolidayArr.Length];
+
+                for (int i = 0; i < stringHolidayArr.Length; i++)
                 {
-                    showHolidayDate.Append(dateHolidayArr[i].ToShortDateString());
-                    showHolidayDate.Append(',');
+                    //把string陣列的公休日轉成DateTime陣列
+                    dateHolidayArr[i] = DateTime.Parse(stringHolidayArr[i]);
+                    //字串存入這個月跟下個月的公休日
+                    if (dateHolidayArr[i].Month == DateTime.Now.Month || dateHolidayArr[i].Month == DateTime.Now.AddMonths(1).Month)
+                    {
+                        showHolidayDate.Append(dateHolidayArr[i].ToString("yyyy/MM/dd"));
+                        showHolidayDate.Append(',');
+                    }
+                    //字串存入這個月之前及下個月之後的日期
+                    else if (dateHolidayArr[i].Month != DateTime.Now.Month || dateHolidayArr[i].Month > DateTime.Now.AddMonths(1).Month)
+                    {
+                        pastHolidayDate.Append(dateHolidayArr[i].ToString("yyyy/MM/dd"));
+                        pastHolidayDate.Append(',');
+                    }
                 }
-                //字串存入這個月之前及下個月之後的日期
-                else if (dateHolidayArr[i].Month != DateTime.Now.Month || dateHolidayArr[i].Month > DateTime.Now.AddMonths(1).Month)
+
+                if (pastHolidayDate.ToString() == "")
                 {
-                    pastHolidayDate.Append(dateHolidayArr[i].ToShortDateString());
-                    pastHolidayDate.Append(',');
+                    return Ok(new { PastHolidayDate = "", ShowHolidayDate = showHolidayDate.ToString().TrimEnd(',') });
+                }
+                else if (showHolidayDate.ToString() == "")
+                {
+                    return Ok(new { PastHolidayDate = pastHolidayDate.ToString().TrimEnd(','), ShowHolidayDate = "" });
+                }
+                else
+                {
+                    return Ok(new { PastHolidayDate = pastHolidayDate.ToString().TrimEnd(','), ShowHolidayDate = showHolidayDate.ToString().TrimEnd(',') });
                 }
             }
-            return Ok(new { PastHolidayDate = pastHolidayDate.ToString().TrimEnd(','), ShowHolidayDate = showHolidayDate.ToString().TrimEnd(',') });
+            else
+            {
+                return Ok(new { PastHolidayDate = "", ShowHolidayDate = "" });
+            }
+
         }
 
 

@@ -176,30 +176,49 @@ namespace BonnieYork.Controllers
             int identityId = (int)userToken["IdentityId"];
             var theHoliday = db.StaffDetail.Where(e => e.Id == identityId).Select(e => e.StaffDaysOff).ToList();
 
-            //把所有公休日轉成string陣列
-            string[] stringHolidayArr = theHoliday[0].Split(',');
-            StringBuilder showStaffDaysOff = new StringBuilder();
-            StringBuilder pastStaffDaysOff = new StringBuilder();
-            DateTime[] dateHolidayArr = new DateTime[stringHolidayArr.Length];
-
-            for (int i = 0; i < stringHolidayArr.Length; i++)
+            if (theHoliday[0] != null)
             {
-                //把string陣列的公休日轉成DateTime陣列
-                dateHolidayArr[i] = DateTime.Parse(stringHolidayArr[i]);
-                //字串存入這個月跟下個月的公休日
-                if (dateHolidayArr[i].Month == DateTime.Now.Month || dateHolidayArr[i].Month == DateTime.Now.AddMonths(1).Month)
+                //把所有公休日轉成string陣列
+                string[] stringHolidayArr = theHoliday[0].Split(',');
+                StringBuilder showStaffDaysOff = new StringBuilder();
+                StringBuilder pastStaffDaysOff = new StringBuilder();
+                DateTime[] dateHolidayArr = new DateTime[stringHolidayArr.Length];
+
+                for (int i = 0; i < stringHolidayArr.Length; i++)
                 {
-                    showStaffDaysOff.Append(dateHolidayArr[i].ToShortDateString());
-                    showStaffDaysOff.Append(',');
+                    //把string陣列的公休日轉成DateTime陣列
+                    dateHolidayArr[i] = DateTime.Parse(stringHolidayArr[i]);
+                    //字串存入這個月跟下個月的公休日
+                    if (dateHolidayArr[i].Month == DateTime.Now.Month || dateHolidayArr[i].Month == DateTime.Now.AddMonths(1).Month)
+                    {
+                        showStaffDaysOff.Append(dateHolidayArr[i].ToString("yyyy/MM/dd"));
+                        showStaffDaysOff.Append(',');
+                    }
+                    //字串存入這個月之前及下個月之後的日期
+                    else if (dateHolidayArr[i].Month != DateTime.Now.Month || dateHolidayArr[i].Month > DateTime.Now.AddMonths(1).Month)
+                    {
+                        pastStaffDaysOff.Append(dateHolidayArr[i].ToString("yyyy/MM/dd"));
+                        pastStaffDaysOff.Append(',');
+                    }
                 }
-                //字串存入這個月之前及下個月之後的日期
-                else if (dateHolidayArr[i].Month != DateTime.Now.Month || dateHolidayArr[i].Month > DateTime.Now.AddMonths(1).Month)
+                if (pastStaffDaysOff.ToString() == "")
                 {
-                    pastStaffDaysOff.Append(dateHolidayArr[i].ToShortDateString());
-                    pastStaffDaysOff.Append(',');
+                    return Ok(new { PastStaffDaysOff = "", ShowStaffDaysOff = showStaffDaysOff.ToString().TrimEnd(',') });
+                }
+                else if (showStaffDaysOff.ToString() == "")
+                {
+                    return Ok(new { PastStaffDaysOff = pastStaffDaysOff.ToString().TrimEnd(','), ShowStaffDaysOff = "" });
+                }
+                else
+                {
+                    return Ok(new { PastStaffDaysOff = pastStaffDaysOff.ToString().TrimEnd(','), ShowStaffDaysOff = showStaffDaysOff.ToString().TrimEnd(',') });
                 }
             }
-            return Ok(new { PastStaffDaysOff = pastStaffDaysOff.ToString().TrimEnd(','), ShowStaffDaysOff = showStaffDaysOff.ToString().TrimEnd(',') });
+            else
+            {
+                return Ok(new { PastStaffDaysOff = "", ShowStaffDaysOff = "" });
+            }
+
 
         }
 
