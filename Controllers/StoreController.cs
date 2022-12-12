@@ -641,7 +641,7 @@ namespace BonnieYork.Controllers
             int identityId = (int)userToken["IdentityId"];
             var theHoliday = db.StoreDetail.Where(s => s.Id == identityId).Select(s => s.HolidayDate).ToList();
 
-            if (theHoliday[0] != null)
+            if (!string.IsNullOrEmpty(theHoliday[0]))
             {
                 //把所有公休日轉成string陣列
                 string[] stringHolidayArr = theHoliday[0].Split(',');
@@ -673,11 +673,11 @@ namespace BonnieYork.Controllers
                 }
                 else if (showHolidayDate.ToString() == "")
                 {
-                    return Ok(new { PastHolidayDate = pastHolidayDate.ToString().TrimEnd(','), ShowHolidayDate = "" });
+                    return BadRequest("目前無新增休假時間");
                 }
                 else
                 {
-                    return Ok(new { PastHolidayDate = pastHolidayDate.ToString().TrimEnd(','), ShowHolidayDate = showHolidayDate.ToString().TrimEnd(',') });
+                    return BadRequest("目前無新增休假時間");
                 }
             }
             else
@@ -726,6 +726,10 @@ namespace BonnieYork.Controllers
         {
             var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
             int identityId = (int)userToken["IdentityId"];
+            if (userToken["Identity"].ToString() == "staff")
+            {
+                identityId = (int)userToken["StoreId"];
+            }
 
             if (DateTime.Now.Month == 1)
             {
@@ -871,7 +875,10 @@ namespace BonnieYork.Controllers
 
             var allStore = db.StoreDetail.Select(s => new
             {
-                StoredId = s.Id,
+                StoreId = s.Id,
+                s.StoreName,
+                s.StaffTitle,
+                s.Description,
                 s.BannerPath,
                 s.BusinessInformation.HolidayStartTime,
                 s.BusinessInformation.HolidayEndTime,
@@ -903,11 +910,14 @@ namespace BonnieYork.Controllers
                         w.BusinessItemsId,
                         w.BusinessItems.ItemName
                     }),
-                    HeadShot = e.HeadShot == null ? null : "https://" + Request.RequestUri.Host + "/upload/headshot/" + e.HeadShot,
+                    HeadShot = e.HeadShot == null ? null : "https://" + Request.RequestUri.Host + "/upload/ItemsImage/" + e.HeadShot,
                 })
             }).AsEnumerable().Select(a => new
             {
-                a.StoredId,
+                a.StoreId,
+                a.StoreName,
+                a.StaffTitle,
+                a.Description,
                 BannerPath = BannerObject(a.BannerPath),
                 a.HolidayStartTime,
                 a.HolidayEndTime,
@@ -925,6 +935,97 @@ namespace BonnieYork.Controllers
             return Ok(allStore);
         }
         object BannerObject(string bannerPath)
+        {
+            if (bannerPath == null)
+            {
+                return null;
+            }
+            else
+            {
+                JObject bannerObject = JObject.Parse(bannerPath); //把bannerPath(string) 轉成物件
+                foreach (var item in bannerObject)
+                {
+                    bannerObject[item.Key] = "https://" + Request.RequestUri.Host + "/upload/Banner/" + item.Value;
+                }
+                return bannerObject;
+            }
+        }
+
+
+
+        /// <summary>
+        /// 單一店家顯示
+        /// </summary>
+        [HttpGet]
+        [Route("GetTheStore")]
+        public IHttpActionResult GetTheStore(int storeId)
+        {
+            var businessItem = db.BusinessItems.AsQueryable();   //對資料庫下指令
+            var staffInformation = db.StaffDetail.AsQueryable();
+            var staffWorkItem = db.StaffWorkItems.AsQueryable();
+
+            var theStore = db.StoreDetail.Where(s => s.Id == storeId).Select(s => new
+            {
+                StoreId = s.Id,
+                s.StoreName,
+                s.StaffTitle,
+                s.Description,
+                s.BannerPath,
+                s.BusinessInformation.HolidayStartTime,
+                s.BusinessInformation.HolidayEndTime,
+                s.BusinessInformation.WeekdayStartTime,
+                s.BusinessInformation.WeekdayEndTime,
+                Address = s.City + s.District + s.Address,
+                s.LineLink,
+                s.FacebookLink,
+                s.InstagramLink,
+                BusinessItem = businessItem.Where(b => b.StoreId == s.Id).Select(b => new
+                {
+                    b.Id,
+                    b.ItemName,
+                    b.SpendTime,
+                    b.Price,
+                    b.Describe,
+                    PicturePath = b.PicturePath == null ? null : "https://" + Request.RequestUri.Host + "/upload/ItemsImage/" + b.PicturePath,
+                }),
+                AllStaffInformation = staffInformation.Where(e => e.StoreId == s.Id).Select(e => new
+                {
+                    e.Id,
+                    e.StaffName,
+                    e.JobTitle,
+                    e.FacebookLink,
+                    e.InstagramLink,
+                    e.LineLink,
+                    StaffWorkItems = staffWorkItem.Where(w => w.StaffId == e.Id).Select(w => new
+                    {
+                        w.BusinessItemsId,
+                        w.BusinessItems.ItemName
+                    }),
+                    HeadShot = e.HeadShot == null ? null : "https://" + Request.RequestUri.Host + "/upload/headshot/" + e.HeadShot,
+                })
+            }).AsEnumerable().Select(a => new
+            {
+                a.StoreId,
+                a.StoreName,
+                a.StaffTitle,
+                a.Description,
+                BannerPath = TheStoreBannerObject(a.BannerPath),
+                a.HolidayStartTime,
+                a.HolidayEndTime,
+                a.WeekdayStartTime,
+                a.WeekdayEndTime,
+                a.Address,
+                a.LineLink,
+                a.FacebookLink,
+                a.InstagramLink,
+                a.BusinessItem,
+                a.AllStaffInformation,
+
+            }).ToList();
+            JObject bannerJObject = new JObject(); //宣告空物件
+            return Ok(theStore);
+        }
+        object TheStoreBannerObject(string bannerPath)
         {
             if (bannerPath == null)
             {

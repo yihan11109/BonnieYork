@@ -616,6 +616,11 @@
             所有店家顯示
             </summary>
         </member>
+        <member name="M:BonnieYork.Controllers.StoreController.GetTheStore(System.Int32)">
+            <summary>
+            單一店家顯示
+            </summary>
+        </member>
         <member name="M:BonnieYork.Controllers.UserController.SignUpIsValid(BonnieYork.Models.ViewModel)">
             <summary>
             (註冊)判斷Email是否註冊過

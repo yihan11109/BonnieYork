@@ -74,6 +74,19 @@ namespace BonnieYork.Controllers
                 item.InstagramLink = view.InstagramLink;
                 item.LineLink = view.LineLink;
             }
+
+            var customerReserveStaffName = db.CustomerReserve.Where(r => r.StaffId == identityId).ToList();
+            foreach (CustomerReserve name in customerReserveStaffName)
+            {
+                name.StaffName = view.StaffName;
+            }
+
+            var staffWorkName = db.StaffWorkItems.Where(w => w.StaffId == identityId).ToList();
+            foreach (StaffWorkItems name in staffWorkName)
+            {
+                name.StaffName = view.StaffName;
+            }
+
             db.SaveChanges();
             string token = JwtAuthUtil.GenerateToken(staffInformation[0].Id, staffInformation[0].StoreId, staffInformation[0].Account, belongs[0], staffInformation[0].StaffName, "", "staff");
 
@@ -176,7 +189,7 @@ namespace BonnieYork.Controllers
             int identityId = (int)userToken["IdentityId"];
             var theHoliday = db.StaffDetail.Where(e => e.Id == identityId).Select(e => e.StaffDaysOff).ToList();
 
-            if (theHoliday[0] != null)
+            if (!string.IsNullOrEmpty(theHoliday[0]))
             {
                 //把所有公休日轉成string陣列
                 string[] stringHolidayArr = theHoliday[0].Split(',');
@@ -207,11 +220,11 @@ namespace BonnieYork.Controllers
                 }
                 else if (showStaffDaysOff.ToString() == "")
                 {
-                    return Ok(new { PastStaffDaysOff = pastStaffDaysOff.ToString().TrimEnd(','), ShowStaffDaysOff = "" });
+                    return BadRequest("目前無新增休假時間");
                 }
                 else
                 {
-                    return Ok(new { PastStaffDaysOff = pastStaffDaysOff.ToString().TrimEnd(','), ShowStaffDaysOff = showStaffDaysOff.ToString().TrimEnd(',') });
+                    return BadRequest("目前無新增休假時間");
                 }
             }
             else
