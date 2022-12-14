@@ -541,7 +541,6 @@ namespace BonnieYork.Controllers
             //新增這個員工更新的工作項目資料
             foreach (string item in businessItemsIdst)
             {
-
                 int businessItemsId = Convert.ToInt32(item);
                 staffWorkItems.BusinessItemsId = businessItemsId;
                 staffWorkItems.StaffId = view.StaffId;
@@ -565,9 +564,14 @@ namespace BonnieYork.Controllers
             var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
             int identityId = (int)userToken["IdentityId"];
             var staffInformaiton = db.StaffDetail.Where(e => e.StoreId == identityId).Where(e => e.Id == staffId).ToList();
+            var staffWorkItem = db.StaffWorkItems.Where(i => i.StaffId == staffId).ToList();
             if (staffInformaiton.Count > 0)
             {
                 db.StaffDetail.Remove(staffInformaiton[0]);
+                foreach (var item in staffWorkItem)
+                {
+                    db.StaffWorkItems.Remove(item);
+                }
                 db.SaveChanges();
                 return Ok(new { Message = "刪除成功" });
             }
@@ -580,7 +584,7 @@ namespace BonnieYork.Controllers
 
 
         /// <summary>
-        /// 店家項目編輯
+        /// 店家營業項目編輯
         /// </summary>
         [HttpPost]
         [JwtAuthFilter]
@@ -606,7 +610,7 @@ namespace BonnieYork.Controllers
 
 
         /// <summary>
-        /// 店家項目刪除
+        /// 店家營業項目刪除
         /// </summary>
         [HttpDelete]
         [JwtAuthFilter]
@@ -616,9 +620,14 @@ namespace BonnieYork.Controllers
             var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
             int identityId = (int)userToken["IdentityId"];
             var theItem = db.BusinessItems.Where(i => i.StoreId == identityId).Where(i => i.Id == itemId).ToList();
+            var staffWorkItem = db.StaffWorkItems.Where(i => i.BusinessItemsId == itemId).ToList();
             if (theItem.Count > 0)
             {
                 db.BusinessItems.Remove(theItem[0]);
+                foreach (var item in staffWorkItem)
+                {
+                    db.StaffWorkItems.Remove(item);
+                }
                 db.SaveChanges();
                 return Ok(new { Message = "刪除成功" });
             }
@@ -797,6 +806,94 @@ namespace BonnieYork.Controllers
 
 
 
+        /// <summary>
+        /// 員工行事曆顯示
+        /// </summary>
+        [HttpGet]
+        [JwtAuthFilter]
+        [Route("StaffCalendar")]
+        public IHttpActionResult Calendar(int staffId)
+        {
+            var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+            int identityId = staffId;
+
+            if (DateTime.Now.Month == 1)
+            {
+                var calendar = db.CustomerReserve.Where(r => r.StaffId == identityId)
+                    .Where(r =>
+                        (r.ReserveDate.Year == (DateTime.Now.Year - 1) & r.ReserveDate.Month == 12) ||
+                        (r.ReserveDate.Year == DateTime.Now.Year & r.ReserveDate.Month == DateTime.Now.Month) ||
+                        (r.ReserveDate.Year == DateTime.Now.Year & r.ReserveDate.Month == (DateTime.Now.Month + 1)))
+                    .OrderBy(r => r.ReserveDate)
+                    .Select(r => new
+                    {
+                        ReserveId = r.Id,
+                        ReserveDate = r.ReserveDate.Year + "/" + r.ReserveDate.Month + "/" + r.ReserveDate.Day,
+                        ReserveStart = r.ReserveStart.Hour + ":" + (r.ReserveEnd.Minute < 10
+                            ? "0" + r.ReserveEnd.Minute
+                            : r.ReserveEnd.Minute.ToString()),
+                        ReserveEnd = r.ReserveEnd.Hour + ":" + (r.ReserveEnd.Minute < 10
+                            ? "0" + r.ReserveEnd.Minute
+                            : r.ReserveEnd.Minute.ToString()),
+                        r.StaffName,
+                        r.CustomerDetail.CustomerName,
+                        r.BusinessItems.ItemName
+                    }).ToList();
+
+                return Ok(calendar);
+            }
+
+            if (DateTime.Now.Month == 12)
+            {
+                var calendar = db.CustomerReserve.Where(r => r.StaffId == identityId)
+                    .Where(r =>
+                        (r.ReserveDate.Year == (DateTime.Now.Year + 1) & r.ReserveDate.Month == 1) ||
+                        (r.ReserveDate.Year == DateTime.Now.Year & r.ReserveDate.Month == DateTime.Now.Month) ||
+                        (r.ReserveDate.Year == DateTime.Now.Year & r.ReserveDate.Month == 11))
+                    .OrderBy(r => r.ReserveDate)
+                    .Select(r => new
+                    {
+                        ReserveId = r.Id,
+                        ReserveDate = r.ReserveDate.Year + "/" + r.ReserveDate.Month + "/" + r.ReserveDate.Day,
+                        ReserveStart = r.ReserveStart.Hour + ":" + (r.ReserveEnd.Minute < 10
+                            ? "0" + r.ReserveEnd.Minute
+                            : r.ReserveEnd.Minute.ToString()),
+                        ReserveEnd = r.ReserveEnd.Hour + ":" + (r.ReserveEnd.Minute < 10
+                            ? "0" + r.ReserveEnd.Minute
+                            : r.ReserveEnd.Minute.ToString()),
+                        r.StaffName,
+                        r.CustomerDetail.CustomerName,
+                        r.BusinessItems.ItemName,
+                    }).ToList();
+                return Ok(calendar);
+            }
+            else
+            {
+                var calendar = db.CustomerReserve.Where(r => r.StaffId == identityId)
+                    .Where(r =>
+                        (r.ReserveDate.Year == DateTime.Now.Year & r.ReserveDate.Month == (DateTime.Now.Month - 1)) ||
+                        (r.ReserveDate.Year == DateTime.Now.Year & r.ReserveDate.Month == DateTime.Now.Month) ||
+                        (r.ReserveDate.Year == DateTime.Now.Year & r.ReserveDate.Month == (DateTime.Now.Month + 1)))
+                    .OrderBy(r => r.ReserveDate)
+                    .Select(r => new
+                    {
+                        ReserveId = r.Id,
+                        ReserveDate = r.ReserveDate.Year + "/" + r.ReserveDate.Month + "/" + r.ReserveDate.Day,
+                        ReserveStart = r.ReserveStart.Hour + ":" + (r.ReserveEnd.Minute < 10
+                            ? "0" + r.ReserveEnd.Minute
+                            : r.ReserveEnd.Minute.ToString()),
+                        ReserveEnd = r.ReserveEnd.Hour + ":" + (r.ReserveEnd.Minute < 10
+                            ? "0" + r.ReserveEnd.Minute
+                            : r.ReserveEnd.Minute.ToString()),
+                        r.StaffName,
+                        r.CustomerDetail.CustomerName,
+                        r.BusinessItems.ItemName
+                    }).ToList();
+
+                return Ok(calendar);
+            }
+        }
+
 
         /// <summary>
         /// 店家預約項目顯示
@@ -814,7 +911,7 @@ namespace BonnieYork.Controllers
                 r.StaffName,
                 CustomerName = r.CustomerDetail == null ? r.ManualName : r.CustomerDetail.CustomerName,
                 r.BusinessItems.ItemName,
-                r.BusinessItems.Price,
+                r.Price,
                 CellphoneNumber = r.CustomerDetail == null ? r.ManualCellphoneNumber : r.CustomerDetail.CellphoneNumber,
                 Email = r.CustomerDetail == null ? r.ManualEmail : r.CustomerDetail.Account,
                 ReserveDate = r.ReserveDate.Year + "/" + r.ReserveDate.Month + "/" + r.ReserveDate.Day,
@@ -833,6 +930,413 @@ namespace BonnieYork.Controllers
 
         }
 
+
+
+        /// <summary>
+        /// 店家編輯預約
+        /// </summary>
+        [HttpPost]
+        [JwtAuthFilter]
+        [Route("EditReserve")]
+        public IHttpActionResult EditReserve(ReserveInformation view)
+        {
+            var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+            int identityId = (int)userToken["IdentityId"];
+
+            var itemPrice = db.BusinessItems.Where(i => i.Id == view.ItemId).Select(i => new
+            {
+                i.SpendTime,
+                i.Price,
+            }).ToList();
+
+            int hourIndex = itemPrice[0].SpendTime.LastIndexOf("小時");
+            int minIndex = itemPrice[0].SpendTime.LastIndexOf("分鐘");
+            int theItemSpendTimeMin;
+            int theItemSpendTimeHour;
+            if (itemPrice[0].SpendTime.Length == 3)
+            {
+                theItemSpendTimeHour = Int32.Parse(itemPrice[0].SpendTime.Remove(hourIndex));
+                theItemSpendTimeMin = 0;
+            }
+            else if (itemPrice[0].SpendTime.Length == 4)
+            {
+                theItemSpendTimeHour = 0;
+                theItemSpendTimeMin = Int32.Parse(itemPrice[0].SpendTime.Substring(0, minIndex));
+            }
+            else
+            {
+                theItemSpendTimeHour = Int32.Parse(itemPrice[0].SpendTime.Remove(hourIndex));
+                theItemSpendTimeMin = Int32.Parse(itemPrice[0].SpendTime.Substring(3, 2));
+            }
+
+            var customerReserve = db.CustomerReserve.Where(r => r.Id == view.ReserveId).ToList();
+            customerReserve[0].ItemId = view.ItemId;
+            customerReserve[0].Price = view.Price;
+            customerReserve[0].ReserveDate = view.ReserveDate;
+            customerReserve[0].ReserveStart = view.ReserveStart;
+            customerReserve[0].ReserveEnd = view.ReserveStart.AddMinutes(theItemSpendTimeHour * 60 + theItemSpendTimeMin);
+            db.SaveChanges();
+            return Ok(new { Message = "預約資訊修改成功" });
+        }
+
+
+
+        /// <summary>
+        /// 店家手動新增預約顯示
+        /// </summary>
+        [HttpGet]
+        [JwtAuthFilter]
+        [Route("ManuallyAddReserve")]
+        public IHttpActionResult ManuallyAddReserve([FromUri] int itemId, [FromUri] int staffId)
+        {
+            var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+            int identityId = (int)userToken["IdentityId"];
+            DateTime now = DateTime.Now;
+            DateTime afterMonth = DateTime.Now.AddMonths(+1);
+
+            //找出店家公休日
+            var storeHolidayDate = db.StoreDetail.Where(s => s.Id == identityId).Select(s => new
+            {
+                s.HolidayDate,
+                s.BusinessInformation.PublicHoliday,
+            }).ToList();
+
+            //店家設定的不定期公休日
+            string[] storeHolidayDateArr = storeHolidayDate[0].HolidayDate.Split(',');
+            string weekDay = "";
+            //店家設定的每個禮拜的公休日
+            List<string> theStoreWorkDate = new List<string>();
+            List<string> theEnableDate = new List<string>();
+            do
+            {
+                switch (now.DayOfWeek)
+                {
+                    case DayOfWeek.Monday:
+                        weekDay = "星期一";
+                        break;
+                    case DayOfWeek.Tuesday:
+                        weekDay = "星期二";
+                        break;
+                    case DayOfWeek.Wednesday:
+                        weekDay = "星期三";
+                        break;
+                    case DayOfWeek.Thursday:
+                        weekDay = "星期四";
+                        break;
+                    case DayOfWeek.Friday:
+                        weekDay = "星期五";
+                        break;
+                    case DayOfWeek.Saturday:
+                        weekDay = "星期六";
+                        break;
+                    case DayOfWeek.Sunday:
+                        weekDay = "星期日";
+                        break;
+                    default:
+                        break;
+                }
+
+                if (!storeHolidayDateArr.Contains(now.ToShortDateString()) &&
+                    weekDay != storeHolidayDate[0].PublicHoliday)
+                {
+                    theStoreWorkDate.Add(now.ToString("yyyy/MM/dd"));
+                }
+                else
+                {
+                    theEnableDate.Add(now.ToString("yyyy/MM/dd"));
+                }
+
+                now = now.AddDays(+1);
+            } while (now != afterMonth);
+
+            //從店家有營業的日期裡刪掉這個員工的休假日 = 這個員工可預約的日期
+            var theStaffDaysOff = db.StaffDetail.Where(e => e.Id == staffId).Select(e => e.StaffDaysOff).ToList();
+            List<string> theStaffWorkDate = new List<string>();
+            //迴圈找店家工作日中有沒有員工休假日，如果沒有把店家工作日存入字串 = 員工工作日
+            for (int i = 0; i < theStoreWorkDate.Count; i++)
+            {
+                if (!string.IsNullOrEmpty(theStaffDaysOff[0]))
+                {
+                    //判斷店家工作日中有沒有員工休假日
+                    if (!theStaffDaysOff[0].Contains(theStoreWorkDate[i]))
+                    {
+                        theStaffWorkDate.Add(theStoreWorkDate[i]);
+                    }
+                    else
+                    {
+                        theEnableDate.Add(theStoreWorkDate[i]);
+                    }
+                }
+                else
+                {
+                    theStaffWorkDate.Add(theStoreWorkDate[i]);
+                }
+            }
+
+            DateTime nextMonth = DateTime.Now.AddMonths(1);
+
+            //在顧客預約表撈現在日期往後推一個月範圍的預約
+            var theStaffReserveDetail = db.CustomerReserve.Where(c => c.StaffId == staffId)
+                .Where(c => c.ReserveState == "Undone")
+                .Where(c => c.ReserveDate >= DateTime.Now && c.ReserveDate <= nextMonth).Select(c => new
+                {
+                    c.ReserveDate,
+                    c.ReserveStart,
+                    c.ReserveEnd
+                }).ToList();
+            Dictionary<DateTime, List<JObject>> theReserveDateDictionary = new Dictionary<DateTime, List<JObject>>();
+            string theReserveDate = "";
+            foreach (var date in theStaffReserveDetail)
+            {
+                JObject dateJObject = new JObject();
+                dateJObject["ReserveStart"] = date.ReserveStart;
+                dateJObject["ReserveEnd"] = date.ReserveEnd;
+                List<JObject> reserveDateList = new List<JObject>();
+                if (theReserveDateDictionary.ContainsKey(date.ReserveDate))
+                {
+                    reserveDateList = theReserveDateDictionary[date.ReserveDate];
+                    reserveDateList.Add(dateJObject);
+                    theReserveDateDictionary[date.ReserveDate] = reserveDateList;
+                }
+                else
+                {
+                    reserveDateList.Add(dateJObject);
+                    theReserveDateDictionary.Add(date.ReserveDate, reserveDateList);
+                }
+
+                theReserveDate += date.ReserveDate;
+                theReserveDate += ',';
+            }
+
+            theReserveDate = theReserveDate.TrimEnd(',');
+
+            //撈出店家營業時間
+            var theStoreBusinessInformation = db.StoreDetail.Where(s => s.Id == identityId).Select(s => new
+            {
+                s.BusinessInformation.HolidayStartTime,
+                s.BusinessInformation.HolidayEndTime,
+                s.BusinessInformation.HolidayBreakStart,
+                s.BusinessInformation.HolidayBreakEnd,
+                s.BusinessInformation.WeekdayStartTime,
+                s.BusinessInformation.WeekdayEndTime,
+                s.BusinessInformation.WeekdayBreakStart,
+                s.BusinessInformation.WeekdayBreakEnd,
+                s.BusinessInformation.TimeInterval
+            }).ToList();
+            int holidayStartTimeToInt =
+                Int32.Parse(theStoreBusinessInformation[0].HolidayStartTime.Replace(":", ""));
+            int holidayEndTimeToInt = Int32.Parse(theStoreBusinessInformation[0].HolidayEndTime.Replace(":", ""));
+            int holidayBreakStartToInt =
+                string.IsNullOrEmpty(theStoreBusinessInformation[0].HolidayBreakStart) == true
+                    ? 0
+                    : Int32.Parse(theStoreBusinessInformation[0].HolidayBreakStart.Replace(":", ""));
+            int holidayBreakEndToInt = string.IsNullOrEmpty(theStoreBusinessInformation[0].HolidayBreakEnd) == true
+                ? 0
+                : Int32.Parse(theStoreBusinessInformation[0].HolidayBreakEnd.Replace(":", ""));
+            int weekdayStartTimeToInt =
+                Int32.Parse(theStoreBusinessInformation[0].WeekdayStartTime.Replace(":", ""));
+            int weekdayEndTimeToInt = Int32.Parse(theStoreBusinessInformation[0].WeekdayEndTime.Replace(":", ""));
+            int weekdayBreakStartToInt =
+                string.IsNullOrEmpty(theStoreBusinessInformation[0].WeekdayBreakStart) == true
+                    ? 0
+                    : Int32.Parse(theStoreBusinessInformation[0].WeekdayBreakStart.Replace(":", ""));
+            int weekdayBreakEndToInt =
+                string.IsNullOrEmpty(theStoreBusinessInformation[0].WeekdayBreakStart) == true
+                    ? 0
+                    : Int32.Parse(theStoreBusinessInformation[0].WeekdayBreakEnd.Replace(":", ""));
+            int timeIntervalToInt = Int32.Parse(theStoreBusinessInformation[0].TimeInterval.Replace("分鐘", "")
+                .Replace("1小時", "60"));
+
+            //撈出項目花費時間
+            var theItemSpendTime = db.BusinessItems.Where(i => i.Id == itemId).Select(i => i.SpendTime).ToList();
+            int hourIndex = theItemSpendTime[0].LastIndexOf("小時");
+            int minIndex = theItemSpendTime[0].LastIndexOf("分鐘");
+            int theItemSpendTimeMin;
+            int theItemSpendTimeHour;
+            if (theItemSpendTime[0].Length == 3)
+            {
+                theItemSpendTimeHour = Int32.Parse(theItemSpendTime[0].Remove(hourIndex));
+                theItemSpendTimeMin = 0;
+            }
+            else if (theItemSpendTime[0].Length == 4)
+            {
+                theItemSpendTimeHour = 0;
+                theItemSpendTimeMin = Int32.Parse(theItemSpendTime[0].Substring(0, minIndex));
+            }
+            else
+            {
+                theItemSpendTimeHour = Int32.Parse(theItemSpendTime[0].Remove(hourIndex));
+                theItemSpendTimeMin = Int32.Parse(theItemSpendTime[0].Substring(3, 2));
+            }
+
+
+            JObject theStaffWorkDateJObject = new JObject();
+            for (int i = 0; i < theStaffWorkDate.Count; i++)
+            {
+                int startTimeToInt;
+                int endTimeToInt;
+                int breakStartToInt;
+                int breakEndToInt;
+                var a = theStaffWorkDate[i];
+                if (DateTime.Parse(theStaffWorkDate[i]).DayOfWeek == DayOfWeek.Saturday ||
+                    DateTime.Parse(theStaffWorkDate[i]).DayOfWeek == DayOfWeek.Sunday)
+                {
+                    startTimeToInt = holidayStartTimeToInt;
+                    endTimeToInt = holidayEndTimeToInt;
+                    breakStartToInt = holidayBreakStartToInt;
+                    breakEndToInt = holidayBreakEndToInt;
+                }
+                else
+                {
+                    startTimeToInt = weekdayStartTimeToInt;
+                    endTimeToInt = weekdayEndTimeToInt;
+                    breakStartToInt = weekdayBreakStartToInt;
+                    breakEndToInt = weekdayBreakEndToInt;
+                }
+
+                int theStartTime = startTimeToInt;
+                StringBuilder theDepositTime = new StringBuilder();
+                while (theStartTime < endTimeToInt)
+                {
+                    int theStartTimesHour;
+                    int theStartTimesMin;
+                    int totalTime = theStartTime + theItemSpendTimeHour * 100 + theItemSpendTimeMin;
+                    int totalTimeHour = totalTime / 100;
+                    int totalTimeMin = totalTime % 100;
+                    while (totalTimeMin >= 60)
+                    {
+                        totalTimeHour += 1;
+                        totalTimeMin -= 60;
+                    }
+                    totalTime = totalTimeHour * 100 + totalTimeMin;
+                    bool isOk = true;
+                    List<JObject> staffWorkDateInReserve = new List<JObject>();
+                    if (theReserveDateDictionary.ContainsKey(DateTime.Parse(theStaffWorkDate[i])))
+                    {
+                        staffWorkDateInReserve = theReserveDateDictionary[DateTime.Parse(theStaffWorkDate[i])];
+                    }
+                    foreach (var timeObject in staffWorkDateInReserve)
+                    {
+                        DateTime reserveStart = (DateTime)timeObject["ReserveStart"];
+                        DateTime reserveEnd = (DateTime)timeObject["ReserveEnd"];
+                        int reserveStartTime = reserveStart.Hour * 100 + reserveStart.Minute;
+                        int reserveEndTime = reserveEnd.Hour * 100 + reserveEnd.Minute;
+                        if (totalTime > reserveStartTime && theStartTime < reserveEndTime)
+                        {
+                            isOk = false;
+                            break;
+                        }
+                    }
+
+                    if (isOk && (totalTime < breakStartToInt || theStartTime > breakEndToInt))
+                    {
+                        theStartTimesHour = theStartTime / 100;
+                        theStartTimesMin = theStartTime % 100;
+                        while (theStartTimesMin >= 60)
+                        {
+                            theStartTimesHour += 1;
+                            theStartTimesMin -= 60;
+                        }
+
+                        if (theStartTimesHour < 10)
+                        {
+                            if (theStartTimesMin < 10)
+                            {
+                                theDepositTime.Append("0" + theStartTimesHour + ":0" + theStartTimesMin +
+                                                      ",");
+                                theStartTime = int.Parse(theStartTimesHour + "0" + theStartTimesMin);
+                            }
+                            else
+                            {
+                                theDepositTime.Append(
+                                    "0" + theStartTimesHour + ":" + theStartTimesMin + ",");
+                                theStartTime = int.Parse(theStartTimesHour + "" + theStartTimesMin);
+                            }
+                        }
+                        else
+                        {
+                            if (theStartTimesMin < 10)
+                            {
+                                theDepositTime.Append(theStartTimesHour + ":0" + theStartTimesMin + ",");
+                                theStartTime = int.Parse(theStartTimesHour + "0" + theStartTimesMin);
+                            }
+                            else
+                            {
+                                theDepositTime.Append(theStartTimesHour + ":" + theStartTimesMin + ",");
+                                theStartTime = int.Parse(theStartTimesHour + "" + theStartTimesMin);
+                            }
+                        }
+                    }
+                    theStartTime += timeIntervalToInt;
+                    int theStartTimeHour = theStartTime / 100;
+                    int theStartTimeMin = theStartTime % 100;
+                    while (theStartTimeMin >= 60)
+                    {
+                        theStartTimeHour += 1;
+                        theStartTimeMin -= 60;
+                    }
+                    theStartTime = theStartTimeHour * 100 + theStartTimeMin;
+                    theStaffWorkDateJObject[theStaffWorkDate[i]] = theDepositTime.ToString().TrimEnd(',');
+                }
+            }
+            return Ok(new { TheReserveDate = theStaffWorkDateJObject, TheEnableDate = theEnableDate });
+        }
+
+
+
+        /// <summary>
+        /// 店家手動新增預約存取
+        /// </summary>
+        [HttpPost]
+        [JwtAuthFilter]
+        [Route("ConfirmManuallyReserve")]
+        public IHttpActionResult ConfirmManuallyReserve(ReserveInformation view)
+        {
+            var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+            int identityId = (int)userToken["IdentityId"];
+            var staffName = db.StaffDetail.Where(e => e.Id == view.StaffId).Select(e => e.StaffName).ToList();
+            var itemPrice = db.BusinessItems.Where(i => i.Id == view.ItemId).Select(i => new
+            {
+                i.SpendTime,
+                i.Price,
+            }).ToList();
+
+            int hourIndex = itemPrice[0].SpendTime.LastIndexOf("小時");
+            int minIndex = itemPrice[0].SpendTime.LastIndexOf("分鐘");
+            int theItemSpendTimeMin;
+            int theItemSpendTimeHour;
+            if (itemPrice[0].SpendTime.Length == 3)
+            {
+                theItemSpendTimeHour = Int32.Parse(itemPrice[0].SpendTime.Remove(hourIndex));
+                theItemSpendTimeMin = 0;
+            }
+            else if (itemPrice[0].SpendTime.Length == 4)
+            {
+                theItemSpendTimeHour = 0;
+                theItemSpendTimeMin = Int32.Parse(itemPrice[0].SpendTime.Substring(0, minIndex));
+            }
+            else
+            {
+                theItemSpendTimeHour = Int32.Parse(itemPrice[0].SpendTime.Remove(hourIndex));
+                theItemSpendTimeMin = Int32.Parse(itemPrice[0].SpendTime.Substring(3, 2));
+            }
+            CustomerReserve customerReserve = new CustomerReserve();
+            customerReserve.StaffId = view.StaffId;
+            customerReserve.ItemId = view.ItemId;
+            customerReserve.ReserveDate = view.ReserveDate;
+            customerReserve.StoreId = identityId;
+            customerReserve.StaffName = staffName[0];
+            customerReserve.ReserveStart = view.ReserveStart;
+            customerReserve.ReserveEnd = view.ReserveStart.AddMinutes(theItemSpendTimeHour * 60 + theItemSpendTimeMin);
+            customerReserve.ReserveState = "undone";
+            customerReserve.ManualName = view.ManualName;
+            customerReserve.ManualCellphoneNumber = view.ManualCellphoneNumber;
+            customerReserve.ManualEmail = view.ManualEmail;
+            customerReserve.Price = itemPrice[0].Price;
+            db.CustomerReserve.Add(customerReserve);
+            db.SaveChanges();
+            return Ok(new { Message = "預約新增成功" });
+        }
 
 
         /// <summary>
@@ -931,7 +1435,6 @@ namespace BonnieYork.Controllers
                 a.AllStaffInformation,
 
             }).ToList();
-            JObject bannerJObject = new JObject(); //宣告空物件
             return Ok(allStore);
         }
         object BannerObject(string bannerPath)
@@ -968,6 +1471,8 @@ namespace BonnieYork.Controllers
             {
                 StoreId = s.Id,
                 s.StoreName,
+                s.CellphoneNumber,
+                s.PhoneNumber,
                 s.StaffTitle,
                 s.Description,
                 s.BannerPath,
@@ -1007,6 +1512,8 @@ namespace BonnieYork.Controllers
             {
                 a.StoreId,
                 a.StoreName,
+                a.CellphoneNumber,
+                a.PhoneNumber,
                 a.StaffTitle,
                 a.Description,
                 BannerPath = TheStoreBannerObject(a.BannerPath),

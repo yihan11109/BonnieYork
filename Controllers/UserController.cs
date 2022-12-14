@@ -256,12 +256,12 @@ namespace BonnieYork.Controllers
                     db.SaveChanges();
 
                     var staffInformation = db.StaffDetail.Where(e => e.Account == view.Account.ToLower()).Select(e => new
-                        {
-                            e.Id,
-                            e.StaffName,
-                            e.StoreId,
-                            e.StoreDetail.StoreName
-                        })
+                    {
+                        e.Id,
+                        e.StaffName,
+                        e.StoreId,
+                        e.StoreDetail.StoreName
+                    })
                         .ToList();
 
                     StaffWorkItems staffWorkItems = new StaffWorkItems();
@@ -560,6 +560,160 @@ namespace BonnieYork.Controllers
             };
             return Ok(result);
         }
+
+
+
+        /// <summary>
+        /// 發送忘記密碼連結
+        /// </summary>
+        [HttpPost]
+        [Route("ForgetPasswordLink")]
+        public IHttpActionResult ForgetPasswordLink(SignUpUserDataView view)
+        {
+            string fromAddress = ConfigurationManager.AppSettings["fromAddress"];
+            string toAddress = view.Account.ToLower();
+            string subject = "BonnieYork重設密碼連結";
+            string mailBody = "親愛的BonnieYork會員您好：" + "<br>此封信件為您在BonnieYork點選「忘記密碼」時所發送之連結信件，" +
+                              "<br >請點選下列連結進入頁面以完成重設密碼。<br ><br>" +
+                              "※提醒您，此連結有效期為10分鐘，若連結失效請再次點選「忘記密碼」按鈕重新寄送連結，謝謝您。<br><br>  http://localhost:3000/signup?token=";
+            string mailBodyEnd = "<br><br>-----此為系統發出信件，請勿直接回覆，感謝您的配合。-----";
+            string emailPassword = ConfigurationManager.AppSettings["emailPassword"];
+            string token = JwtAuthUtil.GenerateSignUpToken(view.Account.ToLower(), 0, "", "",
+                null, "");
+            
+
+            Mail.SendGmailMail(fromAddress, toAddress, subject, mailBody + token + mailBodyEnd, emailPassword);
+
+            return Ok(new { Message = $"註冊連結已寄到{view.Account.ToLower()}"});
+        }
+
+
+
+        /// <summary>
+        /// 忘記密碼
+        /// </summary>
+        [HttpPost]
+        [Route("ForgetPassword")]
+        public IHttpActionResult ForgetPassword(ResetPasswordView view)
+        {
+            CustomerDetail customer = new CustomerDetail();
+            StoreDetail store = new StoreDetail();
+            StaffDetail staff = new StaffDetail();
+            object result = new { };
+            var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+            string Account = userToken["Account"].ToString();
+
+            var customerIdentity = db.CustomerDetail.Where(c => c.Account == Account).ToList();
+            if (customerIdentity.Count > 0)
+            {
+
+            }
+
+
+
+            //    if (userToken["Identity"].ToString() == "member")
+            //{
+            //    string hashPassword = BitConverter
+            //        .ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.OriginalPassword)))
+            //        .Replace("-", null);
+
+            //    var passwordInDb = db.CustomerDetail.Where(c => c.Password == hashPassword).ToList();
+
+            //    if (passwordInDb.Count > 0)
+            //    {
+            //        if (view.Password != view.CheckPassword)
+            //        {
+            //            return BadRequest("新密碼與再次輸入新密碼的內容不一致");
+            //        }
+            //        else
+            //        {
+            //            string newHashPassword = BitConverter
+            //                .ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.CheckPassword)))
+            //                .Replace("-", null);
+
+            //            foreach (CustomerDetail item in passwordInDb)
+            //            {
+            //                item.Password = newHashPassword;
+            //            }
+
+            //            db.SaveChanges();
+            //            result = new
+            //            {
+            //                Message = "密碼修改完成",
+            //            };
+            //        }
+            //    }
+            //    else
+            //    {
+            //        return BadRequest("輸入的舊密碼不符");
+            //    }
+            //}
+            //else if (userToken["Identity"].ToString() == "store")
+            //{
+            //    string hashPassword = BitConverter
+            //        .ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.OriginalPassword)))
+            //        .Replace("-", null);
+            //    var passwordInDb = db.StoreDetail.Where(s => s.Password == hashPassword).ToList();
+            //    if (passwordInDb.Count > 0)
+            //    {
+            //        if (view.Password != view.CheckPassword)
+            //        {
+            //            return BadRequest("新密碼與再次輸入新密碼的內容不一致");
+            //        }
+            //        else
+            //        {
+            //            string newHashPassword = BitConverter
+            //                .ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.CheckPassword)))
+            //                .Replace("-", null);
+
+            //            foreach (StoreDetail item in passwordInDb)
+            //            {
+            //                item.Password = newHashPassword;
+            //            }
+
+            //            db.SaveChanges();
+            //            result = new
+            //            {
+            //                Message = "密碼修改完成",
+            //            };
+            //        }
+            //    }
+            //}
+            //else if (userToken["Identity"].ToString() == "staff")
+            //{
+            //    string hashPassword = BitConverter
+            //        .ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.OriginalPassword)))
+            //        .Replace("-", null);
+            //    var passwordInDb = db.StaffDetail.Where(e => e.Password == hashPassword).ToList();
+            //    if (passwordInDb.Count > 0)
+            //    {
+            //        if (view.Password != view.CheckPassword)
+            //        {
+            //            return BadRequest("新密碼與再次輸入新密碼的內容不一致");
+            //        }
+            //        else
+            //        {
+            //            string newHashPassword = BitConverter
+            //                .ToString(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(view.CheckPassword)))
+            //                .Replace("-", null);
+
+            //            foreach (StaffDetail item in passwordInDb)
+            //            {
+            //                item.Password = newHashPassword;
+            //            }
+
+            //            db.SaveChanges();
+            //            result = new
+            //            {
+            //                Message = "密碼修改完成",
+            //            };
+            //        }
+            //    }
+            //}
+
+            return Ok(result);
+        }
+
     }
 }
 

@@ -44,6 +44,11 @@ namespace BonnieYork.Models
         public int StoreId { get; set; }
 
 
+        [Display(Name = "項目金額")]
+        [MaxLength(10)]
+        public string Price { get; set; }
+
+
 
         [DataType(DataType.Date)]
         [DisplayName("預約日期")]

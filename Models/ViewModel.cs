@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
 
@@ -412,15 +414,97 @@ namespace BonnieYork.Models
         public string SpendTime { get; set; }
 
 
+
         [Required(ErrorMessage = "{0}必填")]
         [Display(Name = "金額")]
         [MaxLength(10)]
         public string Price { get; set; }
 
 
-        [Display(Name = "描述")] public string Describe { get; set; }
+        [Display(Name = "描述")] 
+        public string Describe { get; set; }
 
 
-        [Display(Name = "備註")] public string Remark { get; set; }
+        [Display(Name = "備註")] 
+        public string Remark { get; set; }
+    }
+
+    public class ReserveInformation : ViewModel
+    {
+        [Display(Name = "預約項目ID")]
+        public int? ReserveId { get; set; }
+
+
+        [Display(Name = "顧客ID")] 
+        public int? CustomerId { get; set; }
+
+
+
+        [Display(Name = "營業項目ID")]  
+        public int ItemId { get; set; }
+
+
+
+        [Display(Name = "員工ID")] 
+        public int StaffId { get; set; }
+
+
+        [Display(Name = "員工名稱")] 
+        public string StaffName { get; set; }
+
+
+
+        [Display(Name = "店家ID")]
+        public int StoreId { get; set; }
+
+
+
+        [Display(Name = "項目金額")]
+        [MaxLength(10)]
+        public string Price { get; set; }
+
+
+
+        [DataType(DataType.Date)]
+        [DisplayName("預約日期")]
+        [Required(ErrorMessage = "請選擇預約日期")]
+        public DateTime ReserveDate { get; set; }
+
+
+
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{HH:mm }")]
+        [DataType(DataType.Date)]
+        [DisplayName("預約開始時間")]
+        [Required(ErrorMessage = "請選擇預約時間")]
+        public DateTime ReserveStart { get; set; }
+
+
+
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{HH:mm }")]
+        [DataType(DataType.Date)]
+        [DisplayName("預約結束時間")]
+        public DateTime ReserveEnd { get; set; }
+
+
+
+        [DisplayName("預約狀態")]
+        public string ReserveState { get; set; }
+
+
+
+        [DisplayName("手填顧客姓名")]
+        public string ManualName { get; set; }
+
+
+
+        [DisplayName("手填顧客手機")]
+        public string ManualCellphoneNumber { get; set; }
+
+
+        [EmailAddress(ErrorMessage = "Email格式不符")]
+        [MaxLength(100)]
+        [DataType(DataType.EmailAddress)]
+        [DisplayName("手填顧客Email")]
+        public string ManualEmail { get; set; }
     }
 }

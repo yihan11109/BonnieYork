@@ -344,6 +344,10 @@
     <Compile Include="Migrations\202212080336113_deleteStaffHolidayAddToStaffDetail.Designer.cs">
       <DependentUpon>202212080336113_deleteStaffHolidayAddToStaffDetail.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202212130323115_addItemPriceToReserve.cs" />
+    <Compile Include="Migrations\202212130323115_addItemPriceToReserve.Designer.cs">
+      <DependentUpon>202212130323115_addItemPriceToReserve.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\createAllTable.cs" />
     <Compile Include="Migrations\createAllTable.Designer.cs">
       <DependentUpon>createAllTable.cs</DependentUpon>
@@ -529,6 +533,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202212080336113_deleteStaffHolidayAddToStaffDetail.resx">
       <DependentUpon>202212080336113_deleteStaffHolidayAddToStaffDetail.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202212130323115_addItemPriceToReserve.resx">
+      <DependentUpon>202212130323115_addItemPriceToReserve.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\createAllTable.resx">
       <DependentUpon>createAllTable.cs</DependentUpon>

@@ -264,5 +264,82 @@ namespace BonnieYork.Controllers
             db.SaveChanges();
             return Ok(new { Message = "休假日修改成功" });
         }
+
+
+
+        /// <summary>
+        /// 員工行事曆顯示
+        /// </summary>
+        [HttpGet]
+        [JwtAuthFilter]
+        [Route("Calendar")]
+        public IHttpActionResult Calendar()
+        {
+            var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+            int identityId = (int)userToken["IdentityId"];
+
+            if (DateTime.Now.Month == 1)
+            {
+                var calendar = db.CustomerReserve.Where(r => r.StaffId == identityId)
+                    .Where(r =>
+                        (r.ReserveDate.Year == (DateTime.Now.Year - 1) & r.ReserveDate.Month == 12) ||
+                        (r.ReserveDate.Year == DateTime.Now.Year & r.ReserveDate.Month == DateTime.Now.Month) ||
+                        (r.ReserveDate.Year == DateTime.Now.Year & r.ReserveDate.Month == (DateTime.Now.Month + 1)))
+                    .OrderBy(r => r.ReserveDate)
+                    .Select(r => new
+                    {
+                        ReserveId = r.Id,
+                        ReserveDate = r.ReserveDate.Year + "/" + r.ReserveDate.Month + "/" + r.ReserveDate.Day,
+                        ReserveStart = r.ReserveStart.Hour + ":" + (r.ReserveEnd.Minute < 10 ? "0" + r.ReserveEnd.Minute : r.ReserveEnd.Minute.ToString()),
+                        ReserveEnd = r.ReserveEnd.Hour + ":" + (r.ReserveEnd.Minute < 10 ? "0" + r.ReserveEnd.Minute : r.ReserveEnd.Minute.ToString()),
+                        r.StaffName,
+                        r.CustomerDetail.CustomerName,
+                        r.BusinessItems.ItemName
+                    }).ToList();
+
+                return Ok(calendar);
+            }
+            if (DateTime.Now.Month == 12)
+            {
+                var calendar = db.CustomerReserve.Where(r => r.StaffId == identityId)
+                    .Where(r =>
+                    (r.ReserveDate.Year == (DateTime.Now.Year + 1) & r.ReserveDate.Month == 1) ||
+                    (r.ReserveDate.Year == DateTime.Now.Year & r.ReserveDate.Month == DateTime.Now.Month) ||
+                    (r.ReserveDate.Year == DateTime.Now.Year & r.ReserveDate.Month == 11))
+                    .OrderBy(r => r.ReserveDate)
+                    .Select(r => new
+                    {
+                        ReserveId = r.Id,
+                        ReserveDate = r.ReserveDate.Year + "/" + r.ReserveDate.Month + "/" + r.ReserveDate.Day,
+                        ReserveStart = r.ReserveStart.Hour + ":" + (r.ReserveEnd.Minute < 10 ? "0" + r.ReserveEnd.Minute : r.ReserveEnd.Minute.ToString()),
+                        ReserveEnd = r.ReserveEnd.Hour + ":" + (r.ReserveEnd.Minute < 10 ? "0" + r.ReserveEnd.Minute : r.ReserveEnd.Minute.ToString()),
+                        r.StaffName,
+                        r.CustomerDetail.CustomerName,
+                        r.BusinessItems.ItemName,
+                    }).ToList();
+                return Ok(calendar);
+            }
+            else
+            {
+                var calendar = db.CustomerReserve.Where(r => r.StaffId == identityId)
+                    .Where(r =>
+                    (r.ReserveDate.Year == DateTime.Now.Year & r.ReserveDate.Month == (DateTime.Now.Month - 1)) ||
+                    (r.ReserveDate.Year == DateTime.Now.Year & r.ReserveDate.Month == DateTime.Now.Month) ||
+                    (r.ReserveDate.Year == DateTime.Now.Year & r.ReserveDate.Month == (DateTime.Now.Month + 1)))
+                    .OrderBy(r => r.ReserveDate)
+                    .Select(r => new
+                    {
+                        ReserveId = r.Id,
+                        ReserveDate = r.ReserveDate.Year + "/" + r.ReserveDate.Month + "/" + r.ReserveDate.Day,
+                        ReserveStart = r.ReserveStart.Hour + ":" + (r.ReserveEnd.Minute < 10 ? "0" + r.ReserveEnd.Minute : r.ReserveEnd.Minute.ToString()),
+                        ReserveEnd = r.ReserveEnd.Hour + ":" + (r.ReserveEnd.Minute < 10 ? "0" + r.ReserveEnd.Minute : r.ReserveEnd.Minute.ToString()),
+                        r.StaffName,
+                        r.CustomerDetail.CustomerName,
+                        r.BusinessItems.ItemName
+                    }).ToList();
+
+                return Ok(calendar);
+            }
+        }
     }
 }

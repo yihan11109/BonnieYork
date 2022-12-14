@@ -506,6 +506,21 @@
             預約日期及時間
             </summary>
         </member>
+        <member name="M:BonnieYork.Controllers.CustomerController.ConfirmReserve(BonnieYork.Models.ReserveInformation)">
+            <summary>
+            顧客確定預約
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.CustomerController.FinishReserve">
+            <summary>
+            顧客已完成預約店家及項目
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.CustomerController.UndoneReserve">
+            <summary>
+            顧客未完成預約店家及項目
+            </summary>
+        </member>
         <member name="M:BonnieYork.Controllers.StaffController.GetInformation">
             <summary>
             員工資訊顯示
@@ -529,6 +544,11 @@
         <member name="M:BonnieYork.Controllers.StaffController.EditHolidayDate(BonnieYork.Models.InformationDataView)">
             <summary>
             員工修改休假日
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.StaffController.Calendar">
+            <summary>
+            員工行事曆顯示
             </summary>
         </member>
         <member name="M:BonnieYork.Controllers.StoreController.GetInformation">
@@ -578,12 +598,12 @@
         </member>
         <member name="M:BonnieYork.Controllers.StoreController.EditItems(System.Int32,BonnieYork.Models.AllItems)">
             <summary>
-            店家項目編輯
+            店家營業項目編輯
             </summary>
         </member>
         <member name="M:BonnieYork.Controllers.StoreController.DeleteItems(System.Int32)">
             <summary>
-            店家項目刪除
+            店家營業項目刪除
             </summary>
         </member>
         <member name="M:BonnieYork.Controllers.StoreController.GetHolidayDate">
@@ -601,9 +621,29 @@
             店家行事曆顯示
             </summary>
         </member>
+        <member name="M:BonnieYork.Controllers.StoreController.Calendar(System.Int32)">
+            <summary>
+            員工行事曆顯示
+            </summary>
+        </member>
         <member name="M:BonnieYork.Controllers.StoreController.GetReserve(System.Int32)">
             <summary>
             店家預約項目顯示
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.StoreController.EditReserve(BonnieYork.Models.ReserveInformation)">
+            <summary>
+            店家編輯預約
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.StoreController.ManuallyAddReserve(System.Int32,System.Int32)">
+            <summary>
+            店家手動新增預約顯示
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.StoreController.ConfirmManuallyReserve(BonnieYork.Models.ReserveInformation)">
+            <summary>
+            店家手動新增預約存取
             </summary>
         </member>
         <member name="M:BonnieYork.Controllers.StoreController.DeleteReserve(System.Int32)">
@@ -654,6 +694,16 @@
         <member name="M:BonnieYork.Controllers.UserController.VerifyUser">
             <summary>
             每頁驗證
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.UserController.ForgetPasswordLink(BonnieYork.Models.SignUpUserDataView)">
+            <summary>
+            發送忘記密碼連結
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.UserController.ForgetPassword(BonnieYork.Models.ResetPasswordView)">
+            <summary>
+            忘記密碼
             </summary>
         </member>
         <member name="T:BonnieYork.Models.ViewModel">
