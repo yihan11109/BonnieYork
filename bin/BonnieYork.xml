@@ -511,14 +511,14 @@
             顧客確定預約
             </summary>
         </member>
-        <member name="M:BonnieYork.Controllers.CustomerController.FinishReserve">
+        <member name="M:BonnieYork.Controllers.CustomerController.ReserveState">
             <summary>
-            顧客已完成預約店家及項目
+            顧客預約店家項目狀態
             </summary>
         </member>
-        <member name="M:BonnieYork.Controllers.CustomerController.UndoneReserve">
+        <member name="M:BonnieYork.Controllers.CustomerController.SearchStore(BonnieYork.Models.SearchStore)">
             <summary>
-            顧客未完成預約店家及項目
+            搜尋店家
             </summary>
         </member>
         <member name="M:BonnieYork.Controllers.StaffController.GetInformation">
@@ -636,6 +636,11 @@
             店家編輯預約
             </summary>
         </member>
+        <member name="M:BonnieYork.Controllers.StoreController.ProjectEmployees(System.Int32)">
+            <summary>
+            員工預約項目顯示
+            </summary>
+        </member>
         <member name="M:BonnieYork.Controllers.StoreController.ManuallyAddReserve(System.Int32,System.Int32)">
             <summary>
             店家手動新增預約顯示
@@ -649,6 +654,11 @@
         <member name="M:BonnieYork.Controllers.StoreController.DeleteReserve(System.Int32)">
             <summary>
             店家刪除預約項目
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.StoreController.ConfirmReserve(System.Int32)">
+            <summary>
+            完成預約訂單
             </summary>
         </member>
         <member name="M:BonnieYork.Controllers.StoreController.GetAllStore">
@@ -698,7 +708,7 @@
         </member>
         <member name="M:BonnieYork.Controllers.UserController.ForgetPasswordLink(BonnieYork.Models.SignUpUserDataView)">
             <summary>
-            發送忘記密碼連結
+            發送忘記密碼信
             </summary>
         </member>
         <member name="M:BonnieYork.Controllers.UserController.ForgetPassword(BonnieYork.Models.ResetPasswordView)">

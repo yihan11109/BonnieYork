@@ -344,10 +344,10 @@ namespace BonnieYork.Controllers
                 i.Price,
                 i.Describe,
                 PicturePath = i.PicturePath == null ? i.PicturePath : "https://" + Request.RequestUri.Host + "/upload/ItemsImage/" + i.PicturePath,
-
             }).ToList();
+            var staffTitle = db.StoreDetail.Where(s => s.Id == identityId).Select(s => s.StaffTitle).ToList();
 
-            return Ok(allItems);
+            return Ok(new { allItems, staffTitle });
         }
 
 
@@ -752,14 +752,24 @@ namespace BonnieYork.Controllers
                     {
                         ReserveId = r.Id,
                         ReserveDate = r.ReserveDate.Year + "/" + r.ReserveDate.Month + "/" + r.ReserveDate.Day,
-                        ReserveStart = r.ReserveStart.Hour + ":" + (r.ReserveEnd.Minute < 10 ? "0" + r.ReserveEnd.Minute : r.ReserveEnd.Minute.ToString()),
+                        ReserveStart = r.ReserveStart.Hour + ":" + (r.ReserveStart.Minute < 10 ? "0" + r.ReserveStart.Minute : r.ReserveStart.Minute.ToString()),
                         ReserveEnd = r.ReserveEnd.Hour + ":" + (r.ReserveEnd.Minute < 10 ? "0" + r.ReserveEnd.Minute : r.ReserveEnd.Minute.ToString()),
                         r.StaffName,
-                        r.CustomerDetail.CustomerName,
-                        r.BusinessItems.ItemName
+                        CustomerName = r.CustomerDetail.CustomerName == null ? r.ManualName : r.CustomerDetail.CustomerName,
+                        r.BusinessItems.ItemName,
                     }).ToList();
 
-                return Ok(calendar);
+                var storeInformation = db.StoreDetail.Where(s => s.Id == identityId).Select(s => new
+                {
+                    s.BusinessInformation.PublicHoliday,
+                    s.BusinessInformation.HolidayStartTime,
+                    s.BusinessInformation.HolidayEndTime,
+                    s.BusinessInformation.WeekdayStartTime,
+                    s.BusinessInformation.WeekdayEndTime,
+                    s.HolidayDate
+                }).ToList();
+
+                return Ok(new { calendar, storeInformation });
             }
             if (DateTime.Now.Month == 12)
             {
@@ -773,13 +783,23 @@ namespace BonnieYork.Controllers
                     {
                         ReserveId = r.Id,
                         ReserveDate = r.ReserveDate.Year + "/" + r.ReserveDate.Month + "/" + r.ReserveDate.Day,
-                        ReserveStart = r.ReserveStart.Hour + ":" + (r.ReserveEnd.Minute < 10 ? "0" + r.ReserveEnd.Minute : r.ReserveEnd.Minute.ToString()),
+                        ReserveStart = r.ReserveStart.Hour + ":" + (r.ReserveStart.Minute < 10 ? "0" + r.ReserveStart.Minute : r.ReserveStart.Minute.ToString()),
                         ReserveEnd = r.ReserveEnd.Hour + ":" + (r.ReserveEnd.Minute < 10 ? "0" + r.ReserveEnd.Minute : r.ReserveEnd.Minute.ToString()),
                         r.StaffName,
-                        r.CustomerDetail.CustomerName,
+                        CustomerName = r.CustomerDetail.CustomerName == null ? r.ManualName : r.CustomerDetail.CustomerName,
                         r.BusinessItems.ItemName,
                     }).ToList();
-                return Ok(calendar);
+                var storeInformation = db.StoreDetail.Where(s => s.Id == identityId).Select(s => new
+                {
+                    s.BusinessInformation.PublicHoliday,
+                    s.BusinessInformation.HolidayStartTime,
+                    s.BusinessInformation.HolidayEndTime,
+                    s.BusinessInformation.WeekdayStartTime,
+                    s.BusinessInformation.WeekdayEndTime,
+                    s.HolidayDate
+                }).ToList();
+
+                return Ok(new { calendar, storeInformation });
             }
             else
             {
@@ -793,14 +813,23 @@ namespace BonnieYork.Controllers
                     {
                         ReserveId = r.Id,
                         ReserveDate = r.ReserveDate.Year + "/" + r.ReserveDate.Month + "/" + r.ReserveDate.Day,
-                        ReserveStart = r.ReserveStart.Hour + ":" + (r.ReserveEnd.Minute < 10 ? "0" + r.ReserveEnd.Minute : r.ReserveEnd.Minute.ToString()),
+                        ReserveStart = r.ReserveStart.Hour + ":" + (r.ReserveStart.Minute < 10 ? "0" + r.ReserveStart.Minute : r.ReserveStart.Minute.ToString()),
                         ReserveEnd = r.ReserveEnd.Hour + ":" + (r.ReserveEnd.Minute < 10 ? "0" + r.ReserveEnd.Minute : r.ReserveEnd.Minute.ToString()),
                         r.StaffName,
-                        r.CustomerDetail.CustomerName,
+                        CustomerName = r.CustomerDetail.CustomerName == null ? r.ManualName : r.CustomerDetail.CustomerName,
                         r.BusinessItems.ItemName
                     }).ToList();
+                var storeInformation = db.StoreDetail.Where(s => s.Id == identityId).Select(s => new
+                {
+                    s.BusinessInformation.PublicHoliday,
+                    s.BusinessInformation.HolidayStartTime,
+                    s.BusinessInformation.HolidayEndTime,
+                    s.BusinessInformation.WeekdayStartTime,
+                    s.BusinessInformation.WeekdayEndTime,
+                    s.HolidayDate
+                }).ToList();
 
-                return Ok(calendar);
+                return Ok(new { calendar, storeInformation });
             }
         }
 
@@ -840,7 +869,9 @@ namespace BonnieYork.Controllers
                         r.BusinessItems.ItemName
                     }).ToList();
 
-                return Ok(calendar);
+                var staffInformation = db.StaffDetail.Where(e => e.Id == identityId).Select(e => e.StaffDaysOff);
+
+                return Ok(new{calendar, staffInformation});
             }
 
             if (DateTime.Now.Month == 12)
@@ -865,7 +896,10 @@ namespace BonnieYork.Controllers
                         r.CustomerDetail.CustomerName,
                         r.BusinessItems.ItemName,
                     }).ToList();
-                return Ok(calendar);
+
+                var staffInformation = db.StaffDetail.Where(e => e.Id == identityId).Select(e => e.StaffDaysOff);
+
+                return Ok(new { calendar, staffInformation });
             }
             else
             {
@@ -890,7 +924,9 @@ namespace BonnieYork.Controllers
                         r.BusinessItems.ItemName
                     }).ToList();
 
-                return Ok(calendar);
+                var staffInformation = db.StaffDetail.Where(e => e.Id == identityId).Select(e => e.StaffDaysOff);
+
+                return Ok(new { calendar, staffInformation });
             }
         }
 
@@ -977,6 +1013,30 @@ namespace BonnieYork.Controllers
             customerReserve[0].ReserveEnd = view.ReserveStart.AddMinutes(theItemSpendTimeHour * 60 + theItemSpendTimeMin);
             db.SaveChanges();
             return Ok(new { Message = "預約資訊修改成功" });
+        }
+
+
+
+        /// <summary>
+        /// 員工預約項目顯示
+        /// </summary>
+        [HttpGet]
+        [Route("ProjectEmployees")]
+        public IHttpActionResult ProjectEmployees([FromUri] int itemId)
+        {
+            var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+            int identityId = (int)userToken["IdentityId"];
+            var staffTitle = db.StoreDetail;
+            //會這個項目的所有員工
+            var projectEmployees = db.StaffWorkItems.Where(w => w.BusinessItemsId == itemId).Select(w => new
+            {
+                w.StaffId,
+                w.StaffName,
+                StaffTitle = staffTitle.Where(s => s.Id == identityId).Select(s => s.StaffTitle),
+            }).ToList();
+
+
+            return Ok(projectEmployees);
         }
 
 
@@ -1367,6 +1427,34 @@ namespace BonnieYork.Controllers
 
 
         /// <summary>
+        /// 完成預約訂單
+        /// </summary>
+        [HttpPost]
+        [Route("FinishReserve")]
+        public IHttpActionResult ConfirmReserve([FromUri] int reserveId)
+        {
+            var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+            int identityId = (int)userToken["IdentityId"];
+            if (userToken["Identity"].ToString() == "staff")
+            {
+                identityId = (int)userToken["StoreId"];
+            }
+            var theReserve = db.CustomerReserve.Where(r => r.Id == reserveId).Where(r => r.StoreId == identityId).ToList();
+            if (theReserve.Count > 0)
+            {
+                theReserve[0].ReserveState = "Finish";
+                db.SaveChanges();
+                return Ok(new { Message = "預約訂單狀態已修改為完成" });
+            }
+            else
+            {
+                return BadRequest("無此預約訂單");
+            }
+        }
+
+
+
+        /// <summary>
         /// 所有店家顯示
         /// </summary>
         [HttpGet]
@@ -1532,7 +1620,7 @@ namespace BonnieYork.Controllers
             JObject bannerJObject = new JObject(); //宣告空物件
             return Ok(theStore);
         }
-        object TheStoreBannerObject(string bannerPath)
+        JObject TheStoreBannerObject(string bannerPath)
         {
             if (bannerPath == null)
             {

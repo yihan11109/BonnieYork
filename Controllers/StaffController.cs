@@ -277,6 +277,7 @@ namespace BonnieYork.Controllers
         {
             var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
             int identityId = (int)userToken["IdentityId"];
+            int storeId = (int)userToken["StoreId"];
 
             if (DateTime.Now.Month == 1)
             {
@@ -297,7 +298,10 @@ namespace BonnieYork.Controllers
                         r.BusinessItems.ItemName
                     }).ToList();
 
-                return Ok(calendar);
+                var staffInformation = db.StaffDetail.Where(e => e.Id == identityId).Select(e => e.StaffDaysOff);
+
+                return Ok(new { calendar, staffInformation });
+
             }
             if (DateTime.Now.Month == 12)
             {
@@ -317,7 +321,10 @@ namespace BonnieYork.Controllers
                         r.CustomerDetail.CustomerName,
                         r.BusinessItems.ItemName,
                     }).ToList();
-                return Ok(calendar);
+
+                var staffInformation = db.StaffDetail.Where(e => e.Id == identityId).Select(e => e.StaffDaysOff);
+
+                return Ok(new { calendar, staffInformation });
             }
             else
             {
@@ -338,7 +345,9 @@ namespace BonnieYork.Controllers
                         r.BusinessItems.ItemName
                     }).ToList();
 
-                return Ok(calendar);
+                var staffInformation = db.StaffDetail.Where(e => e.Id == identityId).Select(e => e.StaffDaysOff);
+
+                return Ok(new { calendar, staffInformation });
             }
         }
     }

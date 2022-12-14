@@ -241,8 +241,7 @@ namespace BonnieYork.Controllers
                         break;
                 }
 
-                if (!storeHolidayDateArr.Contains(now.ToShortDateString()) &&
-                    weekDay != storeHolidayDate[0].PublicHoliday)
+                if (!storeHolidayDateArr.Contains(now.ToString("yyyy/MM/dd")) && weekDay != storeHolidayDate[0].PublicHoliday)
                 {
                     theStoreWorkDate.Add(now.ToString("yyyy/MM/dd"));
                 }
@@ -405,7 +404,7 @@ namespace BonnieYork.Controllers
                 {
                     int theStartTimesHour;
                     int theStartTimesMin;
-                    int totalTime = theStartTime + theItemSpendTimeHour*100 + theItemSpendTimeMin;
+                    int totalTime = theStartTime + theItemSpendTimeHour * 100 + theItemSpendTimeMin;
                     int totalTimeHour = totalTime / 100;
                     int totalTimeMin = totalTime % 100;
                     while (totalTimeMin >= 60)
@@ -544,24 +543,27 @@ namespace BonnieYork.Controllers
 
 
         /// <summary>
-        /// 顧客已完成預約店家及項目
+        /// 顧客預約店家項目狀態
         /// </summary>
         [HttpGet]
-        [Route("FinishReserve")]
-        public IHttpActionResult FinishReserve()
+        [Route("ReserveState")]
+        public IHttpActionResult ReserveState()
         {
             var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
             int identityId = (int)userToken["IdentityId"];
             var storeId = db.StoreDetail.AsQueryable();
-            var reserveInformation = db.CustomerReserve.Where(r => r.CustomerId == identityId).Where(r => r.ReserveState == "Finish").Select(r => new
+            var customerReserve = db.CustomerReserve.AsQueryable();
+            var finishReserve = customerReserve.Where(r => r.CustomerId == identityId).Where(r => r.ReserveState == "Finish").Select(r => new
             {
                 r.StoreId,
                 StoreInformation = storeId.Where(s => s.Id == r.StoreId).Select(s => new
                 {
                     s.StoreName,
                     Address = s.City + s.District + s.Address,
+                    s.StaffTitle
                 }),
                 r.ReserveDate,
+                r.ReserveStart,
                 r.StaffName,
                 r.BusinessItems.ItemName,
                 r.BusinessItems.SpendTime,
@@ -570,65 +572,239 @@ namespace BonnieYork.Controllers
             {
                 a.StoreId,
                 a.StoreInformation,
-                ReserveDate = a.ReserveDate.ToString("yyyy-MM-dd"),
+                ReserveDate = a.ReserveDate.ToString("yyyy/MM/dd"),
+                ReserveStart = a.ReserveStart.ToString("HH:mm"),
                 a.StaffName,
                 a.ItemName,
                 a.SpendTime,
                 a.Price
             }).ToList();
-            if (reserveInformation.Count == 0)
+
+            var undoneReserve = customerReserve.Where(r => r.CustomerId == identityId).Where(r => r.ReserveState == "Undone").Select(r => new
+            {
+                r.StoreId,
+                StoreInformation = storeId.Where(s => s.Id == r.StoreId).Select(s => new
+                {
+                    s.StoreName,
+                    Address = s.City + s.District + s.Address,
+                    s.StaffTitle
+                }),
+                r.ReserveDate,
+                r.ReserveStart,
+                r.StaffName,
+                r.BusinessItems.ItemName,
+                r.BusinessItems.SpendTime,
+                r.BusinessItems.Price
+            }).AsEnumerable().Select(a => new
+            {
+                a.StoreId,
+                a.StoreInformation,
+                ReserveDate = a.ReserveDate.ToString("yyyy/MM/dd"),
+                ReserveStart = a.ReserveStart.ToString("HH:mm"),
+                a.StaffName,
+                a.ItemName,
+                a.SpendTime,
+                a.Price
+            }).ToList();
+            if (finishReserve.Count < 0 && undoneReserve.Count < 0)
             {
                 return Ok("無資料");
             }
             else
             {
-                return Ok(reserveInformation);
+                return Ok(new { FinishReserve = finishReserve, UndoneReserve = undoneReserve });
             }
         }
 
 
 
         /// <summary>
-        /// 顧客未完成預約店家及項目
+        /// 搜尋店家
         /// </summary>
         [HttpGet]
-        [Route("UndoneReserve")]
-        public IHttpActionResult UndoneReserve()
+        [Route("SearchStore")]
+        public IHttpActionResult SearchStore([FromBody] SearchStore view)
         {
-            var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
-            int identityId = (int)userToken["IdentityId"];
-            var storeId = db.StoreDetail.AsQueryable();
-            var reserveInformation = db.CustomerReserve.Where(r => r.CustomerId == identityId).Where(r => r.ReserveState == "Undone").Select(r => new
+
+            int page = view.Page;
+            int pageSize = 6;
+            var skip = (page - 1) * pageSize;
+            var businessItem = db.BusinessItems.AsQueryable();
+            if (!string.IsNullOrEmpty(view.City))
             {
-                r.StoreId,
-                StoreInformation = storeId.Where(s => s.Id == r.StoreId).Select(s => new
+                if (!string.IsNullOrEmpty(view.District))
                 {
-                    s.StoreName,
-                    Address = s.City + s.District + s.Address,
-                }),
-                r.ReserveDate,
-                r.StaffName,
-                r.BusinessItems.ItemName,
-                r.BusinessItems.SpendTime,
-                r.BusinessItems.Price
-            }).AsEnumerable().Select(a => new
+                    if (!string.IsNullOrEmpty(view.IndustryId.ToString()))
+                    {
+                        var theStoreInformation = db.StoreDetail.Where(s => s.City == view.City)
+                            .Where(s => s.Description == view.District).Where(s => s.IndustryId == view.IndustryId)
+                            .Select(s => new
+                            {
+                                s.Id,
+                                s.StoreName,
+                                BusinessItem = businessItem.Where(i => i.StoreId == s.Id),
+                                s.BusinessInformation.HolidayStartTime,
+                                s.BusinessInformation.HolidayEndTime,
+                                s.BusinessInformation.WeekdayStartTime,
+                                s.BusinessInformation.WeekdayEndTime,
+                                Address = s.City + s.District + s.Address,
+                                s.Description,
+                               s.BannerPath
+                            }).AsEnumerable().Select(a => new
+                            {
+                                a.Id,
+                                a.StoreName,
+                                a.BusinessItem,
+                                a.HolidayStartTime,
+                                a.HolidayEndTime,
+                                a.WeekdayStartTime,
+                                a.WeekdayEndTime,
+                                a.Address,
+                                a.Description,
+                                BannerPath = BannerObject(a.BannerPath)
+                            }).ToList();
+                        var theResult = theStoreInformation.OrderBy(s => s.Id).Skip(skip).Take(pageSize);
+                        return Ok(theResult);
+                    }
+                    else
+                    {
+                        var theStoreInformation = db.StoreDetail.Where(s => s.City == view.City)
+                            .Where(s => s.Description == view.District)
+                            .Select(s => new
+                            {
+                                s.Id,
+                                s.StoreName,
+                                BusinessItem = businessItem.Where(i => i.StoreId == s.Id),
+                                s.BusinessInformation.HolidayStartTime,
+                                s.BusinessInformation.HolidayEndTime,
+                                s.BusinessInformation.WeekdayStartTime,
+                                s.BusinessInformation.WeekdayEndTime,
+                                Address = s.City + s.District + s.Address,
+                                s.Description,
+                                s.BannerPath
+                            }).AsEnumerable().Select(a => new
+                            {
+                                a.Id,
+                                a.StoreName,
+                                a.BusinessItem,
+                                a.HolidayStartTime,
+                                a.HolidayEndTime,
+                                a.WeekdayStartTime,
+                                a.WeekdayEndTime,
+                                a.Address,
+                                a.Description,
+                                BannerPath = BannerObject(a.BannerPath)
+                            }).ToList();
+                        var theResult = theStoreInformation.OrderBy(s => s.Id).Skip(skip).Take(pageSize);
+                        return Ok(theResult);
+                    }
+                }
+                else
+                {
+                    var theStoreInformation = db.StoreDetail.Where(s => s.City == view.City).Select(s => new
+                    {
+                        s.Id,
+                        s.StoreName,
+                        BusinessItem = businessItem.Where(i => i.StoreId == s.Id),
+                        s.BusinessInformation.HolidayStartTime,
+                        s.BusinessInformation.HolidayEndTime,
+                        s.BusinessInformation.WeekdayStartTime,
+                        s.BusinessInformation.WeekdayEndTime,
+                        Address = s.City + s.District + s.Address,
+                        s.Description,
+                        s.BannerPath
+                    }).AsEnumerable().Select(a => new
+                    {
+                        a.Id,
+                        a.StoreName,
+                        a.BusinessItem,
+                        a.HolidayStartTime,
+                        a.HolidayEndTime,
+                        a.WeekdayStartTime,
+                        a.WeekdayEndTime,
+                        a.Address,
+                        a.Description,
+                        BannerPath = BannerObject(a.BannerPath)
+                    }).ToList();
+                    var theResult = theStoreInformation.OrderBy(s => s.Id).Skip(skip).Take(pageSize);
+                    return Ok(theResult);
+                }
+            }
+            else if (!string.IsNullOrEmpty(view.Keyword))
             {
-                a.StoreId,
-                a.StoreInformation,
-                ReserveDate = a.ReserveDate.ToString("yyyy-MM-dd"),
-                a.StaffName,
-                a.ItemName,
-                a.SpendTime,
-                a.Price
-            }).ToList();
-            if (reserveInformation.Count < 0)
-            {
-                return Ok("無資料");
+                //var theStoreInformation = db.StoreDetail.Where(s => s.StoreName.Contains(view.Keyword)).Select(s => new
+                //{
+                //    s.StoreDetail.Id,
+                //    s.StoreDetail.StoreName,
+                //    s.BusinessItems
+                //    s.BusinessInformation.HolidayStartTime,
+                //    s.BusinessInformation.HolidayEndTime,
+                //    s.BusinessInformation.WeekdayStartTime,
+                //    s.BusinessInformation.WeekdayEndTime,
+                //    Address = i.StoreDetail.City + i.StoreDetail.District + i.StoreDetail.Address,
+                //    i.StoreDetail.Description,
+                //    i.StoreDetail.BannerPath
+                //}).AsEnumerable().Select(a => new
+                //{
+                //    a.Id,
+                //    a.StoreName,
+                //    a.HolidayStartTime,
+                //    a.HolidayEndTime,
+                //    a.WeekdayStartTime,
+                //    a.WeekdayEndTime,
+                //    a.Address,
+                //    a.Description,
+                //    BannerPath = BannerObject(a.BannerPath)
+
+                //}).ToList();
+                //var theResult = theStoreInformation.OrderBy(s => s.Id).Skip(skip).Take(pageSize);
+                return Ok("theResult");
             }
             else
             {
-                return Ok(reserveInformation);
-
+                var theStoreInformation = db.StoreDetail.Select(s => new
+                {
+                    s.Id,
+                    s.StoreName,
+                    BusinessItem = businessItem.Where(i => i.StoreId == s.Id),
+                    s.BusinessInformation.HolidayStartTime,
+                    s.BusinessInformation.HolidayEndTime,
+                    s.BusinessInformation.WeekdayStartTime,
+                    s.BusinessInformation.WeekdayEndTime,
+                    Address = s.City + s.District + s.Address,
+                    s.Description,
+                    s.BannerPath
+                }).AsEnumerable().Select(a => new
+                {
+                    a.Id,
+                    a.StoreName,
+                    a.BusinessItem,
+                    a.HolidayStartTime,
+                    a.HolidayEndTime,
+                    a.WeekdayStartTime,
+                    a.WeekdayEndTime,
+                    a.Address,
+                    a.Description,
+                    BannerPath = BannerObject(a.BannerPath)
+                }).ToList();
+                var theResult = theStoreInformation.OrderBy(s => s.Id).Skip(skip).Take(pageSize);
+                return Ok(theResult);
+            }
+        }
+        JObject BannerObject(string bannerPath)
+        {
+            if (bannerPath == null)
+            {
+                return null;
+            }
+            else
+            {
+                JObject bannerObject = JObject.Parse(bannerPath); //把bannerPath(string) 轉成物件
+                foreach (var item in bannerObject)
+                {
+                    bannerObject[item.Key] = "https://" + Request.RequestUri.Host + "/upload/Banner/" + item.Value;
+                }
+                return bannerObject;
             }
         }
     }

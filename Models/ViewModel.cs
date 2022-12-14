@@ -507,4 +507,39 @@ namespace BonnieYork.Models
         [DisplayName("手填顧客Email")]
         public string ManualEmail { get; set; }
     }
+
+    public class SearchStore : ViewModel
+    {
+        //Store
+        [Display(Name = "產業別編號")]
+        public int? IndustryId { get; set; }
+
+
+        //Store
+        [MaxLength(50)]     //不設長度預設為nvarchar(max)
+        [Display(Name = "縣市")]
+        public string City { get; set; }
+
+
+
+        //Store
+        [MaxLength(50)]     //不設長度預設為nvarchar(max)
+        [Display(Name = "區域")]
+        public string District { get; set; }
+
+
+        //Store
+        [MaxLength(50)]     //不設長度預設為nvarchar(max)
+        [Display(Name = "地址")]
+        public string Address { get; set; }
+
+
+        //Store
+        [MaxLength(50)]     //不設長度預設為nvarchar(max)
+        [Display(Name = "關鍵字")]
+        public string Keyword { get; set; }
+
+        public int Page { get; set; }
+        public int PageSize { get; set; }
+    }
 }
