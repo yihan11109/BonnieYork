@@ -298,9 +298,19 @@ namespace BonnieYork.Controllers
                         r.BusinessItems.ItemName
                     }).ToList();
 
-                var staffInformation = db.StaffDetail.Where(e => e.Id == identityId).Select(e => e.StaffDaysOff);
+                var holidayInformation = db.StaffDetail.Where(e => e.Id == identityId).Select(e => new
+                {
+                    e.StaffDaysOff,
+                    e.StoreDetail.BusinessInformation.HolidayStartTime,
+                    e.StoreDetail.BusinessInformation.HolidayEndTime,
+                    e.StoreDetail.BusinessInformation.WeekdayStartTime,
+                    e.StoreDetail.BusinessInformation.WeekdayEndTime,
+                    e.StoreDetail.BusinessInformation.PublicHoliday,
+                    e.StoreDetail.HolidayDate
 
-                return Ok(new { calendar, staffInformation });
+                });
+
+                return Ok(new { calendar, holidayInformation });
 
             }
             if (DateTime.Now.Month == 12)
@@ -322,9 +332,19 @@ namespace BonnieYork.Controllers
                         r.BusinessItems.ItemName,
                     }).ToList();
 
-                var staffInformation = db.StaffDetail.Where(e => e.Id == identityId).Select(e => e.StaffDaysOff);
+                var holidayInformation = db.StaffDetail.Where(e => e.Id == identityId).Select(e => new
+                {
+                    e.StaffDaysOff,
+                    e.StoreDetail.BusinessInformation.HolidayStartTime,
+                    e.StoreDetail.BusinessInformation.HolidayEndTime,
+                    e.StoreDetail.BusinessInformation.WeekdayStartTime,
+                    e.StoreDetail.BusinessInformation.WeekdayEndTime,
+                    e.StoreDetail.BusinessInformation.PublicHoliday,
+                    e.StoreDetail.HolidayDate
 
-                return Ok(new { calendar, staffInformation });
+                });
+
+                return Ok(new { calendar, holidayInformation });
             }
             else
             {
@@ -345,9 +365,19 @@ namespace BonnieYork.Controllers
                         r.BusinessItems.ItemName
                     }).ToList();
 
-                var staffInformation = db.StaffDetail.Where(e => e.Id == identityId).Select(e => e.StaffDaysOff);
+                var holidayInformation = db.StaffDetail.Where(e => e.Id == identityId).Select(e => new
+                {
+                    e.StaffDaysOff,
+                    e.StoreDetail.BusinessInformation.HolidayStartTime,
+                    e.StoreDetail.BusinessInformation.HolidayEndTime,
+                    e.StoreDetail.BusinessInformation.WeekdayStartTime,
+                    e.StoreDetail.BusinessInformation.WeekdayEndTime,
+                    e.StoreDetail.BusinessInformation.PublicHoliday,
+                    e.StoreDetail.HolidayDate
 
-                return Ok(new { calendar, staffInformation });
+                });
+
+                return Ok(new { calendar, holidayInformation });
             }
         }
     }

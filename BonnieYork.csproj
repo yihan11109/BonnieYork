@@ -357,6 +357,7 @@
     <Compile Include="Models\BusinessInformation.cs" />
     <Compile Include="Models\BusinessItems.cs" />
     <Compile Include="Models\CustomerReserve.cs" />
+    <Compile Include="Models\MyFavourite.cs" />
     <Compile Include="Models\StaffWorkItems.cs" />
     <Compile Include="Tool\JwtAuthFilter.cs" />
     <Compile Include="Tool\JwtAuthUtil.cs" />
