@@ -170,3 +170,4 @@ C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.M
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.addColumnToCustomerReserve.resources
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.deleteStaffHolidayAddToStaffDetail.resources
 C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.addItemPriceToReserve.resources
+C:\Users\litin\OneDrive\桌面\code\BonnieYork\BonnieYork\obj\Debug\BonnieYork.Migrations.addMyFavourite.resources

@@ -56,5 +56,6 @@ namespace BonnieYork.Models
 
 
         public virtual ICollection<CustomerReserve> CustomerReserve { get; set; }
+        public virtual ICollection<MyFavourite> MyFavourite { get; set; }
     }
 }

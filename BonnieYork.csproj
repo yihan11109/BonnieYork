@@ -348,6 +348,10 @@
     <Compile Include="Migrations\202212130323115_addItemPriceToReserve.Designer.cs">
       <DependentUpon>202212130323115_addItemPriceToReserve.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202212150438222_addMyFavourite.cs" />
+    <Compile Include="Migrations\202212150438222_addMyFavourite.Designer.cs">
+      <DependentUpon>202212150438222_addMyFavourite.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\createAllTable.cs" />
     <Compile Include="Migrations\createAllTable.Designer.cs">
       <DependentUpon>createAllTable.cs</DependentUpon>
@@ -537,6 +541,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202212130323115_addItemPriceToReserve.resx">
       <DependentUpon>202212130323115_addItemPriceToReserve.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202212150438222_addMyFavourite.resx">
+      <DependentUpon>202212150438222_addMyFavourite.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\createAllTable.resx">
       <DependentUpon>createAllTable.cs</DependentUpon>

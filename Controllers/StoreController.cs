@@ -1447,7 +1447,7 @@ namespace BonnieYork.Controllers
             var theReserve = db.CustomerReserve.Where(r => r.Id == reserveId).Where(r => r.StoreId == identityId).ToList();
             if (theReserve.Count > 0)
             {
-                theReserve[0].ReserveState = "Finish";
+                theReserve[0].ReserveState = "Done";
                 db.SaveChanges();
                 return Ok(new { Message = "預約訂單狀態已修改為完成" });
             }

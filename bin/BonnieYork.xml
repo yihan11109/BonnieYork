@@ -521,6 +521,21 @@
             搜尋店家
             </summary>
         </member>
+        <member name="M:BonnieYork.Controllers.CustomerController.AddMyFavourite(BonnieYork.Models.SignUpUserDataView)">
+            <summary>
+            顧客新增我的最愛
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.CustomerController.CancelMyFavourite(BonnieYork.Models.SignUpUserDataView)">
+            <summary>
+            顧客取消我的最愛
+            </summary>
+        </member>
+        <member name="M:BonnieYork.Controllers.CustomerController.AllMyFavourite">
+            <summary>
+            顧客所有我的最愛列表
+            </summary>
+        </member>
         <member name="M:BonnieYork.Controllers.StaffController.GetInformation">
             <summary>
             員工資訊顯示
