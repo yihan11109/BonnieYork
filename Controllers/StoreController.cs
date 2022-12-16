@@ -856,7 +856,7 @@ namespace BonnieYork.Controllers
 
 
 
-                return Ok(new{calendar, holidayInformation });
+                return Ok(new { calendar, holidayInformation });
             }
 
             if (DateTime.Now.Month == 12)
@@ -957,6 +957,7 @@ namespace BonnieYork.Controllers
                 Email = r.CustomerDetail == null ? r.ManualEmail : r.CustomerDetail.Account,
                 ReserveDate = r.ReserveDate.Year + "/" + r.ReserveDate.Month + "/" + r.ReserveDate.Day,
                 ReserveStart = r.ReserveStart.Hour + ":" + (r.ReserveEnd.Minute < 10 ? "0" + r.ReserveEnd.Minute : r.ReserveEnd.Minute.ToString()),
+                r.ReserveState,
 
             }).ToList();
 
@@ -1625,7 +1626,14 @@ namespace BonnieYork.Controllers
 
             }).ToList();
             JObject bannerJObject = new JObject(); //宣告空物件
-            return Ok(theStore);
+            if (theStore.Count > 0)
+            {
+                return Ok(theStore);
+            }
+            else
+            {
+                return BadRequest("無此店家ID");
+            }
         }
         JObject TheStoreBannerObject(string bannerPath)
         {

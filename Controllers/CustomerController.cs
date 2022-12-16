@@ -635,8 +635,17 @@ namespace BonnieYork.Controllers
         [Route("SearchStore")]
         public IHttpActionResult SearchStore([FromBody] SearchStore view)
         {
-            //var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
-            //int identityId = (int)userToken["IdentityId"];
+            int identityId;
+            if (Request.Headers.Authorization != null)
+            {
+                var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+                identityId = (int)userToken["IdentityId"];
+            }
+            else
+            {
+                identityId = 0;
+            }
+
             int page = view.Page;
             int pageSize = 6;
             var skip = (page - 1) * pageSize;
@@ -666,7 +675,7 @@ namespace BonnieYork.Controllers
                                 Address = s.City + s.District + s.Address,
                                 s.Description,
                                 s.BannerPath,
-                                IsFavourite = isFavourite.Where(f => f.CustomerId == identityId).Any(f => f.StoreId == s.Id) ? "YES":"No"
+                                IsFavourite = isFavourite.Where(f => f.CustomerId == identityId).Any(f => f.StoreId == s.Id) ? "YES" : "No"
                             }).AsEnumerable().Select(a => new
                             {
                                 a.Id,
