@@ -631,7 +631,7 @@ namespace BonnieYork.Controllers
         /// <summary>
         /// 搜尋店家
         /// </summary>
-        [HttpGet]
+        [HttpPost]
         [Route("SearchStore")]
         public IHttpActionResult SearchStore([FromBody] SearchStore view)
         {
@@ -650,7 +650,7 @@ namespace BonnieYork.Controllers
             int pageSize = 6;
             var skip = (page - 1) * pageSize;
             var businessItem = db.BusinessItems.AsQueryable();
-            var isFavourite = db.MyFavourite.AsQueryable();
+            var isFavorite = db.MyFavourite.AsQueryable();
 
             if (!string.IsNullOrEmpty(view.City))
             {
@@ -675,7 +675,7 @@ namespace BonnieYork.Controllers
                                 Address = s.City + s.District + s.Address,
                                 s.Description,
                                 s.BannerPath,
-                                IsFavourite = isFavourite.Where(f => f.CustomerId == identityId).Any(f => f.StoreId == s.Id) ? "YES" : "No"
+                                IsFavorite = isFavorite.Where(f => f.CustomerId == identityId).Any(f => f.StoreId == s.Id) ? "YES" : "No"
                             }).AsEnumerable().Select(a => new
                             {
                                 a.Id,
@@ -687,7 +687,7 @@ namespace BonnieYork.Controllers
                                 a.WeekdayEndTime,
                                 a.Address,
                                 a.Description,
-                                a.IsFavourite,
+                                a.IsFavorite,
                                 BannerPath = BannerObject(a.BannerPath)
                             }).ToList();
                         int totalPages = (theStoreInformation.Count / pageSize) % pageSize != 0 ? (theStoreInformation.Count / pageSize) + 1 : (theStoreInformation.Count / pageSize) == 0 ? 1 : theStoreInformation.Count / pageSize;
@@ -721,7 +721,7 @@ namespace BonnieYork.Controllers
                                 Address = s.City + s.District + s.Address,
                                 s.Description,
                                 s.BannerPath,
-                                IsFavourite = isFavourite.Where(f => f.CustomerId == identityId).Any(f => f.StoreId == s.Id) ? "YES" : "No"
+                                IsFavorite = isFavorite.Where(f => f.CustomerId == identityId).Any(f => f.StoreId == s.Id) ? "YES" : "No"
                             }).AsEnumerable().Select(a => new
                             {
                                 a.Id,
@@ -734,7 +734,7 @@ namespace BonnieYork.Controllers
                                 a.Address,
                                 a.Description,
                                 BannerPath = BannerObject(a.BannerPath),
-                                a.IsFavourite
+                                a.IsFavorite
                             }).ToList();
                         int totalPages = (theStoreInformation.Count / pageSize) % pageSize != 0 ? (theStoreInformation.Count / pageSize) + 1 : (theStoreInformation.Count / pageSize) == 0 ? 1 : theStoreInformation.Count / pageSize;
                         int totalItem = theStoreInformation.Count;
@@ -768,7 +768,7 @@ namespace BonnieYork.Controllers
                                 Address = s.City + s.District + s.Address,
                                 s.Description,
                                 s.BannerPath,
-                                IsFavourite = isFavourite.Where(f => f.CustomerId == identityId).Any(f => f.StoreId == s.Id) ? "YES" : "No"
+                                IsFavorite = isFavorite.Where(f => f.CustomerId == identityId).Any(f => f.StoreId == s.Id) ? "YES" : "No"
                             }).AsEnumerable().Select(a => new
                             {
                                 a.Id,
@@ -781,7 +781,7 @@ namespace BonnieYork.Controllers
                                 a.Address,
                                 a.Description,
                                 BannerPath = BannerObject(a.BannerPath),
-                                a.IsFavourite
+                                a.IsFavorite
                             }).ToList();
                     int totalPages = (theStoreInformation.Count / pageSize) % pageSize != 0 ? (theStoreInformation.Count / pageSize) + 1 : (theStoreInformation.Count / pageSize) == 0 ? 1 : theStoreInformation.Count / pageSize;
                     int totalItem = theStoreInformation.Count;
@@ -812,7 +812,7 @@ namespace BonnieYork.Controllers
                         Address = s.City + s.District + s.Address,
                         s.Description,
                         s.BannerPath,
-                        IsFavourite = isFavourite.Where(f => f.CustomerId == identityId).Any(f => f.StoreId == s.Id) ? "YES" : "No"
+                        IsFavorite = isFavorite.Where(f => f.CustomerId == identityId).Any(f => f.StoreId == s.Id) ? "YES" : "No"
                     }).AsEnumerable().Select(a => new
                     {
                         a.Id,
@@ -825,7 +825,7 @@ namespace BonnieYork.Controllers
                         a.Address,
                         a.Description,
                         BannerPath = BannerObject(a.BannerPath),
-                        a.IsFavourite
+                        a.IsFavorite
                     }).ToList();
                     int totalPages = (theStoreInformation.Count / pageSize) % pageSize != 0 ? (theStoreInformation.Count / pageSize) + 1 : (theStoreInformation.Count / pageSize) == 0 ? 1 : theStoreInformation.Count / pageSize;
                     int totalItem = theStoreInformation.Count;
@@ -858,7 +858,7 @@ namespace BonnieYork.Controllers
                                Address = s.City + s.District + s.Address,
                                s.Description,
                                s.BannerPath,
-                               IsFavourite = isFavourite.Where(f => f.CustomerId == identityId).Any(f => f.StoreId == s.Id) ? "YES" : "No"
+                               IsFavorite = isFavorite.Where(f => f.CustomerId == identityId).Any(f => f.StoreId == s.Id) ? "YES" : "No"
                            }).AsEnumerable().Select(a => new
                            {
                                a.Id,
@@ -871,7 +871,7 @@ namespace BonnieYork.Controllers
                                a.Address,
                                a.Description,
                                BannerPath = BannerObject(a.BannerPath),
-                               a.IsFavourite
+                               a.IsFavorite
                            }).ToList();
                 int totalPages = (theStoreInformation.Count / pageSize) % pageSize != 0 ? (theStoreInformation.Count / pageSize) + 1 : (theStoreInformation.Count / pageSize) == 0 ? 1 : theStoreInformation.Count / pageSize;
                 int totalItem = theStoreInformation.Count;
@@ -902,11 +902,12 @@ namespace BonnieYork.Controllers
                     Address = s.City + s.District + s.Address,
                     s.Description,
                     s.BannerPath,
-                    IsFavourite = isFavourite.Where(f => f.CustomerId == identityId).Any(f => f.StoreId == s.Id) ? "YES" : "No"
+                    IsFavorite = isFavorite.Where(f => f.CustomerId == identityId).Any(f => f.StoreId == s.Id) ? "YES" : "No"
                 }).AsEnumerable().Select(a => new
                 {
                     a.Id,
                     a.StoreName,
+                    a.BusinessItem,
                     a.HolidayStartTime,
                     a.HolidayEndTime,
                     a.WeekdayStartTime,
@@ -914,7 +915,7 @@ namespace BonnieYork.Controllers
                     a.Address,
                     a.Description,
                     BannerPath = BannerObject(a.BannerPath),
-                    a.IsFavourite
+                    a.IsFavorite
                 }).ToList();
                 int totalPages = (theStoreInformation.Count / pageSize) % pageSize != 0 ? (theStoreInformation.Count / pageSize) + 1 : (theStoreInformation.Count / pageSize) == 0 ? 1 : theStoreInformation.Count / pageSize;
                 int totalItem = theStoreInformation.Count;
@@ -945,7 +946,7 @@ namespace BonnieYork.Controllers
                     Address = s.City + s.District + s.Address,
                     s.Description,
                     s.BannerPath,
-                    IsFavourite = isFavourite.Where(f => f.CustomerId == identityId).Any(f => f.StoreId == s.Id) ? "YES" : "No"
+                    IsFavorite = isFavorite.Where(f => f.CustomerId == identityId).Any(f => f.StoreId == s.Id) ? "YES" : "No"
                 }).AsEnumerable().Select(a => new
                 {
                     a.Id,
@@ -958,7 +959,7 @@ namespace BonnieYork.Controllers
                     a.Address,
                     a.Description,
                     BannerPath = BannerObject(a.BannerPath),
-                    a.IsFavourite
+                    a.IsFavorite
                 }).ToList();
                 int totalPages = (theStoreInformation.Count / pageSize) % pageSize != 0 ? (theStoreInformation.Count / pageSize) + 1 : (theStoreInformation.Count / pageSize) == 0 ? 1 : theStoreInformation.Count / pageSize;
                 int totalItem = theStoreInformation.Count;
@@ -981,16 +982,16 @@ namespace BonnieYork.Controllers
         /// </summary>
         [HttpPost]
         [JwtAuthFilter]
-        [Route("AddMyFavourite")]
-        public IHttpActionResult AddMyFavourite(SignUpUserDataView view)
+        [Route("AddMyFavorite")]
+        public IHttpActionResult AddMyFavorite(SignUpUserDataView view)
         {
             var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
             int identityId = (int)userToken["IdentityId"];
-            MyFavourite myFavourite = new MyFavourite();
-            myFavourite.CustomerId = identityId;
-            myFavourite.StoreId = view.StoreId;
+            MyFavourite myFavorite = new MyFavourite();
+            myFavorite.CustomerId = identityId;
+            myFavorite.StoreId = view.StoreId;
 
-            db.MyFavourite.Add(myFavourite);
+            db.MyFavourite.Add(myFavorite);
             db.SaveChanges();
             return Ok(new { Message = "已新增我的最愛" });
         }
@@ -1001,14 +1002,14 @@ namespace BonnieYork.Controllers
         /// </summary>
         [HttpDelete]
         [JwtAuthFilter]
-        [Route("CancelMyFavourite")]
-        public IHttpActionResult CancelMyFavourite(SignUpUserDataView view)
+        [Route("CancelMyFavorite")]
+        public IHttpActionResult CancelMyFavorite(SignUpUserDataView view)
         {
             var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
             int identityId = (int)userToken["IdentityId"];
-            var myFavourite = db.MyFavourite.Where(f => f.StoreId == view.StoreId).Where(f => f.CustomerId == identityId).ToList();
+            var myFavorite = db.MyFavourite.Where(f => f.StoreId == view.StoreId).Where(f => f.CustomerId == identityId).ToList();
 
-            db.MyFavourite.Remove(myFavourite[0]);
+            db.MyFavourite.Remove(myFavorite[0]);
             db.SaveChanges();
             return Ok(new { Message = "已取消我的最愛" });
         }
@@ -1020,13 +1021,13 @@ namespace BonnieYork.Controllers
         /// </summary>
         [HttpGet]
         [JwtAuthFilter]
-        [Route("AllMyFavourite")]
-        public IHttpActionResult AllMyFavourite()
+        [Route("AllMyFavorite")]
+        public IHttpActionResult AllMyFavorite()
         {
             var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
             int identityId = (int)userToken["IdentityId"];
             var businessItem = db.BusinessItems.AsQueryable();
-            var theCustomerFavourite = db.MyFavourite.Where(f => f.CustomerId == identityId).Select(f => new
+            var theCustomerFavorite = db.MyFavourite.Where(f => f.CustomerId == identityId).Select(f => new
             {
                 f.StoreDetail.Id,
                 f.StoreDetail.StoreName,
@@ -1055,9 +1056,9 @@ namespace BonnieYork.Controllers
                 a.Description,
                 BannerPath = BannerObject(a.BannerPath)
             }).ToList();
-            if (theCustomerFavourite.Count > 0)
+            if (theCustomerFavorite.Count > 0)
             {
-                return Ok(theCustomerFavourite);
+                return Ok(theCustomerFavorite);
             }
             else
             {

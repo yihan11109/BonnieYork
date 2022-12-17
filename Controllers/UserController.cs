@@ -107,7 +107,7 @@ namespace BonnieYork.Controllers
             string subject = "BonnieYork註冊連結確認";
             string mailBody = "親愛的BonnieYork會員您好：" + "<br>此封信件為您在BonnieYork註冊會員時所發送之連結信件，" +
                               "<br >請點選註冊連結進入頁面以完成註冊。<br ><br>" +
-                              "※提醒您，此註冊連結有效期為10分鐘，若連結失效請再次前往註冊頁面重新寄送註冊連結，謝謝您。<br><br>  http://localhost:3000/signup?token=";
+                              "※提醒您，此註冊連結有效期為10分鐘，若連結失效請再次前往註冊頁面重新寄送註冊連結，謝謝您。<br><br>  https://bonnie-york.vercel.app/signup?token=";
             string mailBodyEnd = "<br><br>-----此為系統發出信件，請勿直接回覆，感謝您的配合。-----";
             string emailPassword = ConfigurationManager.AppSettings["emailPassword"];
             string token = "";
@@ -575,7 +575,7 @@ namespace BonnieYork.Controllers
             string subject = "BonnieYork重設密碼連結";
             string mailBody = "親愛的BonnieYork會員您好：" + "<br>此封信件為您在BonnieYork點選「忘記密碼」時所發送之連結信件，" +
                               "<br >請點選下列連結進入頁面以完成重設密碼。<br ><br>" +
-                              "※提醒您，此連結有效期為10分鐘，若連結失效請再次點選「忘記密碼」按鈕重新寄送連結，謝謝您。<br><br>  http://localhost:3000/changepassword?token=";
+                              "※提醒您，此連結有效期為10分鐘，若連結失效請再次點選「忘記密碼」按鈕重新寄送連結，謝謝您。<br><br>  https://bonnie-york.vercel.app/changepassword?token=";
             string mailBodyEnd = "<br><br>-----此為系統發出信件，請勿直接回覆，感謝您的配合。-----";
             string emailPassword = ConfigurationManager.AppSettings["emailPassword"];
 
