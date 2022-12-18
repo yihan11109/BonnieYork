@@ -635,15 +635,11 @@ namespace BonnieYork.Controllers
         [Route("SearchStore")]
         public IHttpActionResult SearchStore([FromBody] SearchStore view)
         {
-            int identityId;
+            int identityId = 0;
             if (Request.Headers.Authorization != null)
             {
                 var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
                 identityId = (int)userToken["IdentityId"];
-            }
-            else
-            {
-                identityId = 0;
             }
 
             int page = view.Page;
@@ -1022,8 +1018,10 @@ namespace BonnieYork.Controllers
         [HttpGet]
         [JwtAuthFilter]
         [Route("AllMyFavorite")]
-        public IHttpActionResult AllMyFavorite()
+        public IHttpActionResult AllMyFavorite([FromUri] int page)
         {
+            int pageSize = 6;
+            var skip = (page - 1) * pageSize;
             var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
             int identityId = (int)userToken["IdentityId"];
             var businessItem = db.BusinessItems.AsQueryable();
@@ -1032,7 +1030,7 @@ namespace BonnieYork.Controllers
                 f.StoreDetail.Id,
                 f.StoreDetail.StoreName,
 
-                BusinessItem = businessItem.Where(b => b.StoreId == b.Id).Select(b => new
+                BusinessItem = businessItem.Where(b => b.StoreId == f.StoreDetail.Id).Select(b => new
                 {
                     b.ItemName,
                 }),
@@ -1056,13 +1054,16 @@ namespace BonnieYork.Controllers
                 a.Description,
                 BannerPath = BannerObject(a.BannerPath)
             }).ToList();
+            int totalPages = (theCustomerFavorite.Count / pageSize) % pageSize != 0 ? (theCustomerFavorite.Count / pageSize) + 1 : (theCustomerFavorite.Count / pageSize) == 0 ? 1 : theCustomerFavorite.Count / pageSize;
+            int totalItem = theCustomerFavorite.Count;
+            var theResult = theCustomerFavorite.OrderBy(s => s.Id).Skip(skip).Take(pageSize);
             if (theCustomerFavorite.Count > 0)
             {
-                return Ok(theCustomerFavorite);
+                return Ok(new { TotalPages = totalPages, TotalItem = totalItem, theResult });
             }
             else
             {
-                return Ok(new{Message = "尚未新增店家至我的最愛"});
+                return Ok(new { Message = "尚未新增店家至我的最愛" });
             }
         }
 
@@ -1080,6 +1081,30 @@ namespace BonnieYork.Controllers
                     bannerObject[item.Key] = "https://" + Request.RequestUri.Host + "/upload/Banner/" + item.Value;
                 }
                 return bannerObject;
+            }
+        }
+
+
+
+        /// <summary>
+        /// 是否為顧客的我的最愛
+        /// </summary>
+        [HttpGet]
+        [JwtAuthFilter]
+        [Route("IsMyFavorite")]
+        public IHttpActionResult IsMyFavorite(int storeId)
+        {
+            var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
+            int identityId = (int)userToken["IdentityId"];
+            var customerFavorite = db.MyFavourite.Where(f => f.CustomerId == identityId)
+                .Where(f => f.StoreId == storeId).ToList();
+            if (customerFavorite.Count > 0)
+            {
+                return Ok(new{Message = "此店家已加入我的最愛"});
+            }
+            else
+            {
+                return BadRequest("尚未加入我的最愛");
             }
         }
     }

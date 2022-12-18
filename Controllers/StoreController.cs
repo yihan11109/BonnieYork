@@ -1560,7 +1560,7 @@ namespace BonnieYork.Controllers
             var businessItem = db.BusinessItems.AsQueryable();   //對資料庫下指令
             var staffInformation = db.StaffDetail.AsQueryable();
             var staffWorkItem = db.StaffWorkItems.AsQueryable();
-
+            var isFavorite = db.MyFavourite.AsQueryable();
             var theStore = db.StoreDetail.Where(s => s.Id == storeId).Select(s => new
             {
                 StoreId = s.Id,
@@ -1572,8 +1572,12 @@ namespace BonnieYork.Controllers
                 s.BannerPath,
                 s.BusinessInformation.HolidayStartTime,
                 s.BusinessInformation.HolidayEndTime,
+                s.BusinessInformation.HolidayBreakStart,
+                s.BusinessInformation.HolidayBreakEnd,
                 s.BusinessInformation.WeekdayStartTime,
                 s.BusinessInformation.WeekdayEndTime,
+                s.BusinessInformation.WeekdayBreakStart,
+                s.BusinessInformation.WeekdayBreakEnd,
                 s.HolidayDate,
                 Address = s.City + s.District + s.Address,
                 s.LineLink,
@@ -1602,7 +1606,7 @@ namespace BonnieYork.Controllers
                         w.BusinessItems.ItemName
                     }),
                     HeadShot = e.HeadShot == null ? null : "https://" + Request.RequestUri.Host + "/upload/headshot/" + e.HeadShot,
-                })
+                }),
             }).AsEnumerable().Select(a => new
             {
                 a.StoreId,
@@ -1614,8 +1618,12 @@ namespace BonnieYork.Controllers
                 BannerPath = TheStoreBannerObject(a.BannerPath),
                 a.HolidayStartTime,
                 a.HolidayEndTime,
+                a.HolidayBreakStart,
+                a.HolidayBreakEnd,
                 a.WeekdayStartTime,
                 a.WeekdayEndTime,
+                a.WeekdayBreakStart,
+                a.WeekdayBreakEnd,
                 a.HolidayDate,
                 a.Address,
                 a.LineLink,
@@ -1623,8 +1631,7 @@ namespace BonnieYork.Controllers
                 a.InstagramLink,
                 a.BusinessItem,
                 a.AllStaffInformation,
-
-            }).ToList();
+                }).ToList();
             JObject bannerJObject = new JObject(); //宣告空物件
             if (theStore.Count > 0)
             {
