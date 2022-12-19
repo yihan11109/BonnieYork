@@ -845,13 +845,13 @@ namespace BonnieYork.Controllers
                     }).ToList();
                 var holidayInformation = db.StaffDetail.Where(e => e.Id == identityId).Select(e => new
                 {
-                    e.StaffDaysOff,
+                    StaffDaysOff = e.StaffDaysOff == null?"": e.StaffDaysOff,
                     e.StoreDetail.BusinessInformation.HolidayStartTime,
                     e.StoreDetail.BusinessInformation.HolidayEndTime,
                     e.StoreDetail.BusinessInformation.WeekdayStartTime,
                     e.StoreDetail.BusinessInformation.WeekdayEndTime,
                     e.StoreDetail.BusinessInformation.PublicHoliday,
-                    e.StoreDetail.HolidayDate
+                    HolidayDate = e.StoreDetail.HolidayDate == null ? "" : e.StoreDetail.HolidayDate
                 });
 
 
@@ -884,13 +884,13 @@ namespace BonnieYork.Controllers
                     }).ToList();
                 var holidayInformation = db.StaffDetail.Where(e => e.Id == identityId).Select(e => new
                 {
-                    e.StaffDaysOff,
+                    StaffDaysOff = e.StaffDaysOff == null ? "" : e.StaffDaysOff,
                     e.StoreDetail.BusinessInformation.HolidayStartTime,
                     e.StoreDetail.BusinessInformation.HolidayEndTime,
                     e.StoreDetail.BusinessInformation.WeekdayStartTime,
                     e.StoreDetail.BusinessInformation.WeekdayEndTime,
                     e.StoreDetail.BusinessInformation.PublicHoliday,
-                    e.StoreDetail.HolidayDate
+                    HolidayDate = e.StoreDetail.HolidayDate == null ? "" : e.StoreDetail.HolidayDate
 
                 });
 
@@ -922,13 +922,13 @@ namespace BonnieYork.Controllers
 
                 var holidayInformation = db.StaffDetail.Where(e => e.Id == identityId).Select(e => new
                 {
-                    e.StaffDaysOff,
+                    StaffDaysOff = e.StaffDaysOff == null ? "" : e.StaffDaysOff,
                     e.StoreDetail.BusinessInformation.HolidayStartTime,
                     e.StoreDetail.BusinessInformation.HolidayEndTime,
                     e.StoreDetail.BusinessInformation.WeekdayStartTime,
                     e.StoreDetail.BusinessInformation.WeekdayEndTime,
                     e.StoreDetail.BusinessInformation.PublicHoliday,
-                    e.StoreDetail.HolidayDate
+                    HolidayDate = e.StoreDetail.HolidayDate == null ? "" : e.StoreDetail.HolidayDate
                 });
 
                 return Ok(new { calendar, holidayInformation });

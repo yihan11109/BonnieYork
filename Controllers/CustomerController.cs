@@ -245,15 +245,28 @@ namespace BonnieYork.Controllers
                         break;
                 }
 
-                if (!storeHolidayDateArr.Contains(now.ToString("yyyy/MM/dd")) && weekDay != storeHolidayDate[0].PublicHoliday)
+                if (!string.IsNullOrEmpty(storeHolidayDateArr.ToString()))
                 {
-                    theStoreWorkDate.Add(now.ToString("yyyy/MM/dd"));
+                    if (!storeHolidayDateArr.Contains(now.ToString("yyyy/MM/dd")) && weekDay != storeHolidayDate[0].PublicHoliday)
+                    {
+                        theStoreWorkDate.Add(now.ToString("yyyy/MM/dd"));
+                    }
+                    else
+                    {
+                        theEnableDate.Add(now.ToString("yyyy/MM/dd"));
+                    }
                 }
                 else
                 {
-                    theEnableDate.Add(now.ToString("yyyy/MM/dd"));
+                    if (weekDay != storeHolidayDate[0].PublicHoliday)
+                    {
+                        theStoreWorkDate.Add(now.ToString("yyyy/MM/dd"));
+                    }
+                    else
+                    {
+                        theEnableDate.Add(now.ToString("yyyy/MM/dd"));
+                    }
                 }
-
                 now = now.AddDays(+1);
             } while (now != afterMonth);
 
@@ -391,32 +404,35 @@ namespace BonnieYork.Controllers
                 {
                     startTimeToInt = holidayStartTimeToInt;
                     endTimeToInt = holidayEndTimeToInt;
-                    breakStartToInt = holidayBreakStartToInt;
+                    breakStartToInt = holidayBreakStartToInt == 0 ? 2400 : holidayBreakStartToInt;
                     breakEndToInt = holidayBreakEndToInt;
                 }
                 else
                 {
                     startTimeToInt = weekdayStartTimeToInt;
                     endTimeToInt = weekdayEndTimeToInt;
-                    breakStartToInt = weekdayBreakStartToInt;
+                    breakStartToInt = weekdayBreakStartToInt == 0 ? 2400 : weekdayBreakStartToInt;
                     breakEndToInt = weekdayBreakEndToInt;
                 }
 
                 int theStartTime = startTimeToInt;
                 StringBuilder theDepositTime = new StringBuilder();
-                while (theStartTime < endTimeToInt)
+
+                int totalTime = theStartTime + theItemSpendTimeHour * 100 + theItemSpendTimeMin;
+                int totalTimeHour = totalTime / 100;
+                int totalTimeMin = totalTime % 100;
+                while (totalTimeMin >= 60)
+                {
+                    totalTimeHour += 1;
+                    totalTimeMin -= 60;
+                }
+                totalTime = totalTimeHour * 100 + totalTimeMin;
+
+                while (totalTime <= endTimeToInt)
                 {
                     int theStartTimesHour;
                     int theStartTimesMin;
-                    int totalTime = theStartTime + theItemSpendTimeHour * 100 + theItemSpendTimeMin;
-                    int totalTimeHour = totalTime / 100;
-                    int totalTimeMin = totalTime % 100;
-                    while (totalTimeMin >= 60)
-                    {
-                        totalTimeHour += 1;
-                        totalTimeMin -= 60;
-                    }
-                    totalTime = totalTimeHour * 100 + totalTimeMin;
+
                     bool isOk = true;
                     List<JObject> staffWorkDateInReserve = new List<JObject>();
                     if (theReserveDateDictionary.ContainsKey(DateTime.Parse(theStaffWorkDate[i])))
@@ -485,6 +501,15 @@ namespace BonnieYork.Controllers
                     }
                     theStartTime = theStartTimeHour * 100 + theStartTimeMin;
                     theStaffWorkDateJObject[theStaffWorkDate[i]] = theDepositTime.ToString().TrimEnd(',');
+                    totalTime = theStartTime + theItemSpendTimeHour * 100 + theItemSpendTimeMin;
+                    totalTimeHour = totalTime / 100;
+                    totalTimeMin = totalTime % 100;
+                    while (totalTimeMin >= 60)
+                    {
+                        totalTimeHour += 1;
+                        totalTimeMin -= 60;
+                    }
+                    totalTime = totalTimeHour * 100 + totalTimeMin;
                 }
             }
             return Ok(new { TheReserveDate = theStaffWorkDateJObject, TheEnableDate = theEnableDate });
@@ -636,338 +661,77 @@ namespace BonnieYork.Controllers
         public IHttpActionResult SearchStore([FromBody] SearchStore view)
         {
             int identityId = 0;
+            int pageSize = 6;
+            int skip = (view.Page - 1) * pageSize;
             if (Request.Headers.Authorization != null)
             {
                 var userToken = JwtAuthFilter.GetToken(Request.Headers.Authorization.Parameter);
                 identityId = (int)userToken["IdentityId"];
             }
 
-            int page = view.Page;
-            int pageSize = 6;
-            var skip = (page - 1) * pageSize;
             var businessItem = db.BusinessItems.AsQueryable();
             var isFavorite = db.MyFavourite.AsQueryable();
+            var theStoreInformationDb = db.StoreDetail.AsQueryable();
 
             if (!string.IsNullOrEmpty(view.City))
             {
+                theStoreInformationDb = theStoreInformationDb.Where(s => s.City == view.City);
                 if (!string.IsNullOrEmpty(view.District))
                 {
-                    if (!string.IsNullOrEmpty(view.IndustryId.ToString()))
-                    {
-                        var theStoreInformation = db.StoreDetail.Where(s => s.City == view.City)
-                            .Where(s => s.District == view.District).Where(s => s.IndustryId == view.IndustryId)
-                            .Select(s => new
-                            {
-                                s.Id,
-                                s.StoreName,
-                                BusinessItem = businessItem.Where(b => b.StoreId == s.Id).Select(b => new
-                                {
-                                    b.ItemName,
-                                }),
-                                s.BusinessInformation.HolidayStartTime,
-                                s.BusinessInformation.HolidayEndTime,
-                                s.BusinessInformation.WeekdayStartTime,
-                                s.BusinessInformation.WeekdayEndTime,
-                                Address = s.City + s.District + s.Address,
-                                s.Description,
-                                s.BannerPath,
-                                IsFavorite = isFavorite.Where(f => f.CustomerId == identityId).Any(f => f.StoreId == s.Id) ? "YES" : "No"
-                            }).AsEnumerable().Select(a => new
-                            {
-                                a.Id,
-                                a.StoreName,
-                                a.BusinessItem,
-                                a.HolidayStartTime,
-                                a.HolidayEndTime,
-                                a.WeekdayStartTime,
-                                a.WeekdayEndTime,
-                                a.Address,
-                                a.Description,
-                                a.IsFavorite,
-                                BannerPath = BannerObject(a.BannerPath)
-                            }).ToList();
-                        int totalPages = (theStoreInformation.Count / pageSize) % pageSize != 0 ? (theStoreInformation.Count / pageSize) + 1 : (theStoreInformation.Count / pageSize) == 0 ? 1 : theStoreInformation.Count / pageSize;
-                        int totalItem = theStoreInformation.Count;
-                        var theResult = theStoreInformation.OrderBy(s => s.Id).Skip(skip).Take(pageSize);
-                        if (totalItem == 0)
-                        {
-                            return Ok("尚無合作店家資料");
-                        }
-                        else
-                        {
-                            return Ok(new { TotalPages = totalPages, TotalItem = totalItem, TheResult = theResult });
-                        }
-                    }
-                    else
-                    {
-                        var theStoreInformation = db.StoreDetail.Where(s => s.City == view.City)
-                            .Where(s => s.District == view.District)
-                            .Select(s => new
-                            {
-                                s.Id,
-                                s.StoreName,
-                                BusinessItem = businessItem.Where(b => b.StoreId == s.Id).Select(b => new
-                                {
-                                    b.ItemName,
-                                }),
-                                s.BusinessInformation.HolidayStartTime,
-                                s.BusinessInformation.HolidayEndTime,
-                                s.BusinessInformation.WeekdayStartTime,
-                                s.BusinessInformation.WeekdayEndTime,
-                                Address = s.City + s.District + s.Address,
-                                s.Description,
-                                s.BannerPath,
-                                IsFavorite = isFavorite.Where(f => f.CustomerId == identityId).Any(f => f.StoreId == s.Id) ? "YES" : "No"
-                            }).AsEnumerable().Select(a => new
-                            {
-                                a.Id,
-                                a.StoreName,
-                                a.BusinessItem,
-                                a.HolidayStartTime,
-                                a.HolidayEndTime,
-                                a.WeekdayStartTime,
-                                a.WeekdayEndTime,
-                                a.Address,
-                                a.Description,
-                                BannerPath = BannerObject(a.BannerPath),
-                                a.IsFavorite
-                            }).ToList();
-                        int totalPages = (theStoreInformation.Count / pageSize) % pageSize != 0 ? (theStoreInformation.Count / pageSize) + 1 : (theStoreInformation.Count / pageSize) == 0 ? 1 : theStoreInformation.Count / pageSize;
-                        int totalItem = theStoreInformation.Count;
-                        var theResult = theStoreInformation.OrderBy(s => s.Id).Skip(skip).Take(pageSize);
-                        if (totalItem == 0)
-                        {
-                            return Ok("尚無合作店家資料");
-                        }
-                        else
-                        {
-                            return Ok(new { TotalPages = totalPages, TotalItem = totalItem, TheResult = theResult });
-                        }
-                    }
-                }
-                else if (!string.IsNullOrEmpty(view.IndustryId.ToString()))
-                {
-                    var theStoreInformation = db.StoreDetail.Where(s => s.City == view.City)
-                            .Where(s => s.IndustryId == view.IndustryId)
-                            .Select(s => new
-                            {
-                                s.Id,
-                                s.StoreName,
-                                BusinessItem = businessItem.Where(b => b.StoreId == s.Id).Select(b => new
-                                {
-                                    b.ItemName,
-                                }),
-                                s.BusinessInformation.HolidayStartTime,
-                                s.BusinessInformation.HolidayEndTime,
-                                s.BusinessInformation.WeekdayStartTime,
-                                s.BusinessInformation.WeekdayEndTime,
-                                Address = s.City + s.District + s.Address,
-                                s.Description,
-                                s.BannerPath,
-                                IsFavorite = isFavorite.Where(f => f.CustomerId == identityId).Any(f => f.StoreId == s.Id) ? "YES" : "No"
-                            }).AsEnumerable().Select(a => new
-                            {
-                                a.Id,
-                                a.StoreName,
-                                a.BusinessItem,
-                                a.HolidayStartTime,
-                                a.HolidayEndTime,
-                                a.WeekdayStartTime,
-                                a.WeekdayEndTime,
-                                a.Address,
-                                a.Description,
-                                BannerPath = BannerObject(a.BannerPath),
-                                a.IsFavorite
-                            }).ToList();
-                    int totalPages = (theStoreInformation.Count / pageSize) % pageSize != 0 ? (theStoreInformation.Count / pageSize) + 1 : (theStoreInformation.Count / pageSize) == 0 ? 1 : theStoreInformation.Count / pageSize;
-                    int totalItem = theStoreInformation.Count;
-                    var theResult = theStoreInformation.OrderBy(s => s.Id).Skip(skip).Take(pageSize);
-                    if (totalItem == 0)
-                    {
-                        return Ok("尚無合作店家資料");
-                    }
-                    else
-                    {
-                        return Ok(new { TotalPages = totalPages, TotalItem = totalItem, TheResult = theResult });
-                    }
-                }
-                else
-                {
-                    var theStoreInformation = db.StoreDetail.Where(s => s.City == view.City).Select(s => new
-                    {
-                        s.Id,
-                        s.StoreName,
-                        BusinessItem = businessItem.Where(b => b.StoreId == s.Id).Select(b => new
-                        {
-                            b.ItemName,
-                        }),
-                        s.BusinessInformation.HolidayStartTime,
-                        s.BusinessInformation.HolidayEndTime,
-                        s.BusinessInformation.WeekdayStartTime,
-                        s.BusinessInformation.WeekdayEndTime,
-                        Address = s.City + s.District + s.Address,
-                        s.Description,
-                        s.BannerPath,
-                        IsFavorite = isFavorite.Where(f => f.CustomerId == identityId).Any(f => f.StoreId == s.Id) ? "YES" : "No"
-                    }).AsEnumerable().Select(a => new
-                    {
-                        a.Id,
-                        a.StoreName,
-                        a.BusinessItem,
-                        a.HolidayStartTime,
-                        a.HolidayEndTime,
-                        a.WeekdayStartTime,
-                        a.WeekdayEndTime,
-                        a.Address,
-                        a.Description,
-                        BannerPath = BannerObject(a.BannerPath),
-                        a.IsFavorite
-                    }).ToList();
-                    int totalPages = (theStoreInformation.Count / pageSize) % pageSize != 0 ? (theStoreInformation.Count / pageSize) + 1 : (theStoreInformation.Count / pageSize) == 0 ? 1 : theStoreInformation.Count / pageSize;
-                    int totalItem = theStoreInformation.Count;
-                    var theResult = theStoreInformation.OrderBy(s => s.Id).Skip(skip).Take(pageSize);
-                    if (totalItem == 0)
-                    {
-                        return Ok("尚無合作店家資料");
-                    }
-                    else
-                    {
-                        return Ok(new { TotalPages = totalPages, TotalItem = totalItem, TheResult = theResult });
-                    }
+                    theStoreInformationDb = theStoreInformationDb.Where(s => s.District == view.District);
                 }
             }
-            else if (!string.IsNullOrEmpty(view.IndustryId.ToString()))
+            if (!string.IsNullOrEmpty(view.IndustryId.ToString()))
             {
-                var theStoreInformation = db.StoreDetail.Where(s => s.IndustryId == view.IndustryId)
-                           .Select(s => new
-                           {
-                               s.Id,
-                               s.StoreName,
-                               BusinessItem = businessItem.Where(b => b.StoreId == s.Id).Select(b => new
-                               {
-                                   b.ItemName,
-                               }),
-                               s.BusinessInformation.HolidayStartTime,
-                               s.BusinessInformation.HolidayEndTime,
-                               s.BusinessInformation.WeekdayStartTime,
-                               s.BusinessInformation.WeekdayEndTime,
-                               Address = s.City + s.District + s.Address,
-                               s.Description,
-                               s.BannerPath,
-                               IsFavorite = isFavorite.Where(f => f.CustomerId == identityId).Any(f => f.StoreId == s.Id) ? "YES" : "No"
-                           }).AsEnumerable().Select(a => new
-                           {
-                               a.Id,
-                               a.StoreName,
-                               a.BusinessItem,
-                               a.HolidayStartTime,
-                               a.HolidayEndTime,
-                               a.WeekdayStartTime,
-                               a.WeekdayEndTime,
-                               a.Address,
-                               a.Description,
-                               BannerPath = BannerObject(a.BannerPath),
-                               a.IsFavorite
-                           }).ToList();
-                int totalPages = (theStoreInformation.Count / pageSize) % pageSize != 0 ? (theStoreInformation.Count / pageSize) + 1 : (theStoreInformation.Count / pageSize) == 0 ? 1 : theStoreInformation.Count / pageSize;
-                int totalItem = theStoreInformation.Count;
-                var theResult = theStoreInformation.OrderBy(s => s.Id).Skip(skip).Take(pageSize);
-                if (totalItem == 0)
-                {
-                    return Ok("尚無合作店家資料");
-                }
-                else
-                {
-                    return Ok(new { TotalPages = totalPages, TotalItem = totalItem, TheResult = theResult });
-                }
+                theStoreInformationDb = theStoreInformationDb.Where(s => s.IndustryId == view.IndustryId);
             }
-            else if (!string.IsNullOrEmpty(view.Keyword))
+            if (!string.IsNullOrEmpty(view.Keyword))
             {
-                var theStoreInformation = db.StoreDetail.Where(s => s.StoreName.Contains(view.Keyword)).Select(s => new
+                theStoreInformationDb = theStoreInformationDb.Where(s => s.StoreName.Contains(view.Keyword));
+            }
+
+            var theStoreInformation = theStoreInformationDb.Select(s => new
+            {
+                s.Id,
+                s.StoreName,
+                BusinessItem = businessItem.Where(b => b.StoreId == s.Id).Select(b => new
                 {
-                    s.Id,
-                    s.StoreName,
-                    BusinessItem = businessItem.Where(b => b.StoreId == s.Id).Select(b => new
-                    {
-                        b.ItemName,
-                    }),
-                    s.BusinessInformation.HolidayStartTime,
-                    s.BusinessInformation.HolidayEndTime,
-                    s.BusinessInformation.WeekdayStartTime,
-                    s.BusinessInformation.WeekdayEndTime,
-                    Address = s.City + s.District + s.Address,
-                    s.Description,
-                    s.BannerPath,
-                    IsFavorite = isFavorite.Where(f => f.CustomerId == identityId).Any(f => f.StoreId == s.Id) ? "YES" : "No"
-                }).AsEnumerable().Select(a => new
-                {
-                    a.Id,
-                    a.StoreName,
-                    a.BusinessItem,
-                    a.HolidayStartTime,
-                    a.HolidayEndTime,
-                    a.WeekdayStartTime,
-                    a.WeekdayEndTime,
-                    a.Address,
-                    a.Description,
-                    BannerPath = BannerObject(a.BannerPath),
-                    a.IsFavorite
-                }).ToList();
-                int totalPages = (theStoreInformation.Count / pageSize) % pageSize != 0 ? (theStoreInformation.Count / pageSize) + 1 : (theStoreInformation.Count / pageSize) == 0 ? 1 : theStoreInformation.Count / pageSize;
-                int totalItem = theStoreInformation.Count;
-                var theResult = theStoreInformation.OrderBy(s => s.Id).Skip(skip).Take(pageSize);
-                if (totalItem == 0)
-                {
-                    return Ok("尚無合作店家資料");
-                }
-                else
-                {
-                    return Ok(new { TotalPages = totalPages, TotalItem = totalItem, TheResult = theResult });
-                }
+                    b.ItemName,
+                }),
+                s.BusinessInformation.HolidayStartTime,
+                s.BusinessInformation.HolidayEndTime,
+                s.BusinessInformation.WeekdayStartTime,
+                s.BusinessInformation.WeekdayEndTime,
+                Address = s.City + s.District + s.Address,
+                s.Description,
+                s.BannerPath,
+                IsFavorite = isFavorite.Where(f => f.CustomerId == identityId).Any(f => f.StoreId == s.Id) ? "YES" : "No"
+            }).AsEnumerable().Select(a => new
+            {
+                a.Id,
+                a.StoreName,
+                a.BusinessItem,
+                a.HolidayStartTime,
+                a.HolidayEndTime,
+                a.WeekdayStartTime,
+                a.WeekdayEndTime,
+                a.Address,
+                a.Description,
+                a.IsFavorite,
+                BannerPath = BannerObject(a.BannerPath)
+            }).ToList();
+
+            int totalPages = theStoreInformation.Count / pageSize;
+            totalPages = theStoreInformation.Count % pageSize == 0 ? totalPages : totalPages + 1;
+            int totalItem = theStoreInformation.Count;
+            var theResult = theStoreInformation.OrderBy(s => s.Id).Skip(skip).Take(pageSize);
+            if (totalItem == 0)
+            {
+                return Ok("尚無合作店家資料");
             }
             else
             {
-                var theStoreInformation = db.StoreDetail.Select(s => new
-                {
-                    s.Id,
-                    s.StoreName,
-                    BusinessItem = businessItem.Where(b => b.StoreId == s.Id).Select(b => new
-                    {
-                        b.ItemName,
-                    }),
-                    s.BusinessInformation.HolidayStartTime,
-                    s.BusinessInformation.HolidayEndTime,
-                    s.BusinessInformation.WeekdayStartTime,
-                    s.BusinessInformation.WeekdayEndTime,
-                    Address = s.City + s.District + s.Address,
-                    s.Description,
-                    s.BannerPath,
-                    IsFavorite = isFavorite.Where(f => f.CustomerId == identityId).Any(f => f.StoreId == s.Id) ? "YES" : "No"
-                }).AsEnumerable().Select(a => new
-                {
-                    a.Id,
-                    a.StoreName,
-                    a.BusinessItem,
-                    a.HolidayStartTime,
-                    a.HolidayEndTime,
-                    a.WeekdayStartTime,
-                    a.WeekdayEndTime,
-                    a.Address,
-                    a.Description,
-                    BannerPath = BannerObject(a.BannerPath),
-                    a.IsFavorite
-                }).ToList();
-                int totalPages = (theStoreInformation.Count / pageSize) % pageSize != 0 ? (theStoreInformation.Count / pageSize) + 1 : (theStoreInformation.Count / pageSize) == 0 ? 1 : theStoreInformation.Count / pageSize;
-                int totalItem = theStoreInformation.Count;
-                var theResult = theStoreInformation.OrderBy(s => s.Id).Skip(skip).Take(pageSize);
-                if (totalItem == 0)
-                {
-                    return Ok("尚無合作店家資料");
-                }
-                else
-                {
-                    return Ok(new { TotalPages = totalPages, TotalItem = totalItem, TheResult = theResult });
-                }
+                return Ok(new { TotalPages = totalPages, TotalItem = totalItem, TheResult = theResult });
             }
         }
 
@@ -1100,7 +864,7 @@ namespace BonnieYork.Controllers
                 .Where(f => f.StoreId == storeId).ToList();
             if (customerFavorite.Count > 0)
             {
-                return Ok(new{Message = "此店家已加入我的最愛"});
+                return Ok(new { Message = "此店家已加入我的最愛" });
             }
             else
             {
