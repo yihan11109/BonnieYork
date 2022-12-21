@@ -1,0 +1,46 @@
+@charset "utf-8";
+
+img, div, input { 
+	behavior: url("css/iepngfix.htc"); 
+
+}
+
+body {
+	margin-top: 0px;
+	background-image: url(../images/bg1.jpg);
+	behavior: url("css/csshover.htc");
+	height: 100%;
+	background-repeat: repeat-x;
+	background-color: #f3f3f3;
+}
+.top {
+	float: left;
+	width: 1002px;
+	background-image: url(../images/menu1.jpg);
+	height: 102px;
+}
+.top12 {
+	float: left;
+	height: 398px;
+	width: 1002px;
+	overflow: hidden;
+}
+
+.contain {
+	width: 1002px;
+	margin-right: auto;
+	margin-left: auto;
+}
+.rightimg01 {
+	float: right;
+	overflow: hidden;
+	height: 830px;
+	width: 1002px;	
+}
+.bot {
+	background-image: url(../images/bot1.jpg);
+	float: left;
+	height: 500px;
+	width: 1002px;
+	background-repeat: no-repeat;
+}

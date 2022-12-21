@@ -125,27 +125,27 @@ namespace BonnieYork.Controllers
                 return BadRequest("JobTitle欄位必填");
             }
 
-            if (view.TimeInterval == null)
+            if (view.TimeInterval == null || view.TimeInterval == "請選擇區間")
             {
                 return BadRequest("TimeInterval欄位必填");
             }
 
-            if (view.WeekdayStartTime == null)
+            if (string.IsNullOrEmpty(view.WeekdayStartTime))
             {
                 return BadRequest("WeekdayStartTime欄位必填");
             }
 
-            if (view.WeekdayEndTime == null)
+            if (string.IsNullOrEmpty(view.WeekdayEndTime))
             {
                 return BadRequest("WeekdayEndTime欄位必填");
             }
 
-            if (view.HolidayStartTime == null)
+            if (string.IsNullOrEmpty(view.HolidayStartTime))
             {
                 return BadRequest("HolidayStartTime欄位必填");
             }
 
-            if (view.HolidayEndTime == null)
+            if (string.IsNullOrEmpty(view.HolidayEndTime))
             {
                 return BadRequest("HolidayEndTime欄位必填");
             }
@@ -155,7 +155,7 @@ namespace BonnieYork.Controllers
                 return BadRequest("Description欄位必填");
             }
 
-
+            
             foreach (StoreDetail item in storeDetailInDb)
             {
                 if (item.BusinessInformation == null)
@@ -207,7 +207,7 @@ namespace BonnieYork.Controllers
             string token = JwtAuthUtil.GenerateToken(storeDetailInDb[0].Id, storeDetailInDb[0].Id,
                 storeDetailInDb[0].Account, storeDetailInDb[0].StoreName, "", "", "store");
 
-            return Ok(new { Message = "店鋪資訊修改完成" });
+            return Ok(new { Message = "店鋪資訊修改完成"});
         }
 
 

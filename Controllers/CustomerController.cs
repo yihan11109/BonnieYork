@@ -211,7 +211,7 @@ namespace BonnieYork.Controllers
             }).ToList();
 
             //店家設定的不定期公休日
-            string[] storeHolidayDateArr = storeHolidayDate[0].HolidayDate.Split(',');
+            string[] storeHolidayDateArr = storeHolidayDate[0].HolidayDate == null? Array.Empty<string>():storeHolidayDate[0].HolidayDate.Split(',');
             string weekDay = "";
             //店家設定的每個禮拜的公休日
             List<string> theStoreWorkDate = new List<string>();
@@ -245,7 +245,7 @@ namespace BonnieYork.Controllers
                         break;
                 }
 
-                if (!string.IsNullOrEmpty(storeHolidayDateArr.ToString()))
+                if (storeHolidayDateArr.Length > 0)
                 {
                     if (!storeHolidayDateArr.Contains(now.ToString("yyyy/MM/dd")) && weekDay != storeHolidayDate[0].PublicHoliday)
                     {
@@ -561,7 +561,7 @@ namespace BonnieYork.Controllers
             customerReserve.StaffName = view.StaffName;
             customerReserve.ReserveStart = view.ReserveStart;
             customerReserve.ReserveEnd = view.ReserveStart.AddMinutes(theItemSpendTimeHour * 60 + theItemSpendTimeMin);
-            customerReserve.ReserveState = "undone";
+            customerReserve.ReserveState = "Undone";
             customerReserve.Price = itemPrice[0].Price;
 
             db.CustomerReserve.Add(customerReserve);
@@ -690,7 +690,7 @@ namespace BonnieYork.Controllers
                 theStoreInformationDb = theStoreInformationDb.Where(s => s.StoreName.Contains(view.Keyword));
             }
 
-            var theStoreInformation = theStoreInformationDb.Select(s => new
+            var theStoreInformation = theStoreInformationDb.Where(s => s.IndustryId != null).Select(s => new
             {
                 s.Id,
                 s.StoreName,
