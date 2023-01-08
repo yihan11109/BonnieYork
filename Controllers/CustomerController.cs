@@ -211,7 +211,7 @@ namespace BonnieYork.Controllers
             }).ToList();
 
             //店家設定的不定期公休日
-            string[] storeHolidayDateArr = storeHolidayDate[0].HolidayDate == null? Array.Empty<string>():storeHolidayDate[0].HolidayDate.Split(',');
+            string[] storeHolidayDateArr = storeHolidayDate[0].HolidayDate == null ? Array.Empty<string>() : storeHolidayDate[0].HolidayDate.Split(',');
             string weekDay = "";
             //店家設定的每個禮拜的公休日
             List<string> theStoreWorkDate = new List<string>();
@@ -398,7 +398,6 @@ namespace BonnieYork.Controllers
                 int endTimeToInt;
                 int breakStartToInt;
                 int breakEndToInt;
-                var a = theStaffWorkDate[i];
                 if (DateTime.Parse(theStaffWorkDate[i]).DayOfWeek == DayOfWeek.Saturday ||
                     DateTime.Parse(theStaffWorkDate[i]).DayOfWeek == DayOfWeek.Sunday)
                 {
@@ -414,8 +413,8 @@ namespace BonnieYork.Controllers
                     breakStartToInt = weekdayBreakStartToInt == 0 ? 2400 : weekdayBreakStartToInt;
                     breakEndToInt = weekdayBreakEndToInt;
                 }
-
                 int theStartTime = startTimeToInt;
+
                 StringBuilder theDepositTime = new StringBuilder();
 
                 int totalTime = theStartTime + theItemSpendTimeHour * 100 + theItemSpendTimeMin;
@@ -445,13 +444,14 @@ namespace BonnieYork.Controllers
                         DateTime reserveEnd = (DateTime)timeObject["ReserveEnd"];
                         int reserveStartTime = reserveStart.Hour * 100 + reserveStart.Minute;
                         int reserveEndTime = reserveEnd.Hour * 100 + reserveEnd.Minute;
+                        //不能預約的時間
                         if (totalTime > reserveStartTime && theStartTime < reserveEndTime)
                         {
                             isOk = false;
                             break;
                         }
                     }
-
+                    //判斷預約時間是否涵蓋到休息時間
                     if (isOk && (totalTime < breakStartToInt || theStartTime > breakEndToInt))
                     {
                         theStartTimesHour = theStartTime / 100;
@@ -462,32 +462,50 @@ namespace BonnieYork.Controllers
                             theStartTimesMin -= 60;
                         }
 
-                        if (theStartTimesHour < 10)
+
+                        DateTimeOffset taipeiStandardTimeOffset = DateTimeOffset.Now.ToOffset(new TimeSpan(8, 0, 0));
+                        bool IsBeforeTime = true;
+
+                        if (DateTime.Parse(theStaffWorkDate[i]).ToString("yyyy/MM/dd") == taipeiStandardTimeOffset.ToString("yyyy/MM/dd"))
                         {
-                            if (theStartTimesMin < 10)
+                            int nowHour = taipeiStandardTimeOffset.Hour;
+                            int nowMin = taipeiStandardTimeOffset.Minute;
+                            int nowTime = nowHour * 100 + nowMin;
+                            if (theStartTime < nowTime)
                             {
-                                theDepositTime.Append("0" + theStartTimesHour + ":0" + theStartTimesMin +
-                                                      ",");
-                                theStartTime = int.Parse(theStartTimesHour + "0" + theStartTimesMin);
-                            }
-                            else
-                            {
-                                theDepositTime.Append(
-                                    "0" + theStartTimesHour + ":" + theStartTimesMin + ",");
-                                theStartTime = int.Parse(theStartTimesHour + "" + theStartTimesMin);
+                                IsBeforeTime = false;
                             }
                         }
-                        else
+
+                        if (IsBeforeTime == true)
                         {
-                            if (theStartTimesMin < 10)
+                            if (theStartTimesHour < 10)
                             {
-                                theDepositTime.Append(theStartTimesHour + ":0" + theStartTimesMin + ",");
-                                theStartTime = int.Parse(theStartTimesHour + "0" + theStartTimesMin);
+                                if (theStartTimesMin < 10)
+                                {
+                                    theDepositTime.Append("0" + theStartTimesHour + ":0" + theStartTimesMin +
+                                                          ",");
+                                    theStartTime = int.Parse(theStartTimesHour + "0" + theStartTimesMin);
+                                }
+                                else
+                                {
+                                    theDepositTime.Append(
+                                        "0" + theStartTimesHour + ":" + theStartTimesMin + ",");
+                                    theStartTime = int.Parse(theStartTimesHour + "" + theStartTimesMin);
+                                }
                             }
                             else
                             {
-                                theDepositTime.Append(theStartTimesHour + ":" + theStartTimesMin + ",");
-                                theStartTime = int.Parse(theStartTimesHour + "" + theStartTimesMin);
+                                if (theStartTimesMin < 10)
+                                {
+                                    theDepositTime.Append(theStartTimesHour + ":0" + theStartTimesMin + ",");
+                                    theStartTime = int.Parse(theStartTimesHour + "0" + theStartTimesMin);
+                                }
+                                else
+                                {
+                                    theDepositTime.Append(theStartTimesHour + ":" + theStartTimesMin + ",");
+                                    theStartTime = int.Parse(theStartTimesHour + "" + theStartTimesMin);
+                                }
                             }
                         }
                     }
@@ -500,7 +518,11 @@ namespace BonnieYork.Controllers
                         theStartTimeMin -= 60;
                     }
                     theStartTime = theStartTimeHour * 100 + theStartTimeMin;
-                    theStaffWorkDateJObject[theStaffWorkDate[i]] = theDepositTime.ToString().TrimEnd(',');
+                    if (theDepositTime.ToString() != "")
+                    {
+                        theStaffWorkDateJObject[theStaffWorkDate[i]] = theDepositTime.ToString().TrimEnd(',');
+                    }
+
                     totalTime = theStartTime + theItemSpendTimeHour * 100 + theItemSpendTimeMin;
                     totalTimeHour = totalTime / 100;
                     totalTimeMin = totalTime % 100;
@@ -510,6 +532,11 @@ namespace BonnieYork.Controllers
                         totalTimeMin -= 60;
                     }
                     totalTime = totalTimeHour * 100 + totalTimeMin;
+                }
+
+                if (theDepositTime.ToString() == "")
+                {
+                    theEnableDate.Add(theStaffWorkDate[i].ToString());
                 }
             }
             return Ok(new { TheReserveDate = theStaffWorkDateJObject, TheEnableDate = theEnableDate });
